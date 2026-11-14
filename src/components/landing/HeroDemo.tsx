@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import styles from "./Landing.module.css";
 import { CheckIcon, PhoneIcon, ReplayIcon } from "./icons";
 import { TallyBadge } from "./Tally";
 import type { TallyPose } from "./tally-art";
+import fx from "@/components/fx/Fx.module.css";
 import {
   DEMO_ENDS,
   DEMO_JOBS,
@@ -41,12 +42,12 @@ const CHIPS: Record<Phase, { text: string; tone: "neutral" | "question" | "ready
 
 const NOTES: Record<Phase, string> = {
   listening: "Listening…",
-  drafting: "Matching the customer and your saved prices…",
-  held: "One question before this can go out.",
-  ready: "Draft ready. Nothing sends until you confirm.",
-  sending: "Sending through Stripe…",
-  sent: "Sent. Juniper Cafe gets the invoice with a payment page.",
-  paid: "Paid. Juniper Cafe paid on the Stripe payment page.",
+  drafting: "Pricing from your list…",
+  held: "One question first.",
+  ready: "Ready. Double-tap to send.",
+  sending: "Sending…",
+  sent: "Sent through Stripe.",
+  paid: "Paid.",
 };
 
 /** Which Tally pose matches each moment of the demo. */
@@ -134,6 +135,19 @@ export function HeroDemo() {
   const answer = () => setSt((prev) => ({ ...prev, answered: true, phase: "ready", hover: null }));
   const confirm = () => setSt((prev) => (prev.phase === "ready" ? { ...prev, phase: "sending" } : prev));
 
+  // Like the band: one tap only nudges, a second tap within 450 ms sends. Works with mouse, touch and keyboard.
+  const lastTap = useRef(0);
+  const [nudge, setNudge] = useState(0);
+  const tap = (event: { timeStamp: number }) => {
+    if (event.timeStamp - lastTap.current < 450) {
+      lastTap.current = 0;
+      confirm();
+    } else {
+      lastTap.current = event.timeStamp;
+      setNudge((n) => n + 1);
+    }
+  };
+
   const job = DEMO_JOBS[st.scenario];
   const words = DEMO_WORDS[st.scenario];
   const ends = DEMO_ENDS[st.scenario];
@@ -156,22 +170,14 @@ export function HeroDemo() {
   const paidNow = phase === "paid";
   const chip = CHIPS[phase];
 
-  let confirmNote = "Unlocks when the draft is complete.";
-  if (canSend) confirmNote = "You’ll confirm with one tap on your phone.";
+  let confirmNote = "";
+  if (canSend) confirmNote = nudge > 0 ? "Twice, like on your band." : "Tap twice, like on your band.";
   else if (phase === "held") confirmNote = "Answer the question first.";
 
   const track = [
-    { state: "done", label: "Confirmed by you", sub: "This exact invoice and recipient" },
-    {
-      state: sentNow ? "done" : "now",
-      label: sentNow ? "Sent through Stripe" : "Sending through Stripe",
-      sub: "Email with a payment page and PDF",
-    },
-    {
-      state: paidNow ? "done" : "next",
-      label: "Paid",
-      sub: paidNow ? "Paid on the Stripe payment page" : "Shows here when Juniper Cafe pays",
-    },
+    { state: "done", label: "Double-tapped" },
+    { state: sentNow ? "done" : "now", label: "Sent through Stripe" },
+    { state: paidNow ? "done" : "next", label: "Paid" },
   ] as const;
 
   return (
@@ -289,12 +295,9 @@ export function HeroDemo() {
                 <span className={styles.questionBadge} aria-hidden="true">
                   ?
                 </span>
-                <div>
-                  <div className={styles.questionTitle}>Which parts make up the $45?</div>
-                  <div className={styles.questionText}>Worvo only bills parts it can match to your price list.</div>
-                </div>
+                <div className={styles.questionTitle}>Which parts make up the $45?</div>
               </div>
-              <button type="button" className={styles.answerBtn} onClick={answer}>
+              <button type="button" className={`${styles.answerBtn} ${fx.fx} ${fx.light}`} onClick={answer}>
                 Answer: two shutoff valves
               </button>
             </div>
@@ -322,21 +325,24 @@ export function HeroDemo() {
                     <span className={styles.trackLabel} data-muted={mark.state === "next"}>
                       {mark.label}
                     </span>
-                    <span className={styles.trackSub}>{mark.sub}</span>
                   </span>
                 </li>
               ))}
             </ol>
           ) : (
             <div className={styles.confirm}>
-              <button type="button" className={styles.confirmBtn} disabled={!canSend} onClick={confirm}>
-                Confirm and send
+              <button
+                type="button"
+                className={`${styles.confirmBtn} ${fx.fx}`}
+                data-nudge={nudge === 0 ? undefined : nudge % 2 ? "a" : "b"}
+                disabled={!canSend}
+                onClick={tap}
+              >
+                Double-tap to send
               </button>
-              <span className={styles.confirmNote}>{confirmNote}</span>
+              {confirmNote ? <span className={styles.confirmNote}>{confirmNote}</span> : null}
             </div>
           )}
-
-          <p className={styles.taxNote}>Tax not assessed in this sample.</p>
         </div>
       </div>
     </>

@@ -9,8 +9,8 @@ export function stripeClient(env: NodeJS.ProcessEnv = process.env): Stripe {
   if (!key) {
     throw new InvoiceError("provider_unavailable", "STRIPE_SECRET_KEY is not set in .env.local");
   }
-  if (!/^(sk|rk)_test_/.test(key)) {
-    throw new InvoiceError("provider_unavailable", "Worvo runs on Stripe test mode only: use an sk_test_ or rk_test_ key");
+  if (!/^(sk|rk)[a-z]*_test_/.test(key)) {
+    throw new InvoiceError("provider_unavailable", "Worvo runs on Stripe test mode only: use a test key (sk_test_, rk_test_ or rkcs_test_)");
   }
   if (cached?.key !== key) {
     cached = { key, client: new Stripe(key, { appInfo: { name: "worvo" } }) };

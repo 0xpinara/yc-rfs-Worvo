@@ -42,12 +42,35 @@ export function invoiceStatus(invoice: InvoiceView): { label: string; tone: Stat
   return { label: "Ready to send", tone: "ready" };
 }
 
-/** Short summary of an invoice's lines, e.g. "90 min labor · 2 shutoff valves". */
-export function lineSummary(invoice: InvoiceView): string {
-  if (invoice.lines.length === 0) return "No lines yet";
-  return invoice.lines
-    .map((line) => (line.unit === "minute" ? `${line.quantity} min ${line.description.toLowerCase()}` : `${line.quantity} × ${line.description}`))
+type LineLike = { description: string; quantity: number; unit: "minute" | "each" };
+
+/** 90 → "1 h 30 min", 45 → "45 min", 240 → "4 h". */
+export function duration(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return `${rest} min`;
+  return rest === 0 ? `${hours} h` : `${hours} h ${rest} min`;
+}
+
+/** Short summary of an invoice's lines, e.g. "1 h 30 min labor · 2 × Shutoff valve". */
+export function lineSummary(lines: readonly LineLike[]): string {
+  if (lines.length === 0) return "No lines yet";
+  return lines
+    .map((line) =>
+      line.unit === "minute"
+        ? `${duration(line.quantity)} ${line.description.toLowerCase()}`
+        : line.quantity === 1
+          ? line.description
+          : `${line.quantity} × ${line.description}`,
+    )
     .join(" · ");
+}
+
+const shortDateFormat = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+
+/** "2026-11-13" → "Nov 13". */
+export function shortDate(isoDate: string): string {
+  return shortDateFormat.format(new Date(`${isoDate}T12:00:00Z`));
 }
 
 export function draftSource(source: Capture["source"]): DraftRequest["source"] {

@@ -8,11 +8,11 @@ import { MeetTally, TallyHero } from "./Tally";
 const STEPS = [
   {
     title: "Set up once",
-    body: "From your phone or browser, connect Stripe, add your customers, and save your labor rate and parts prices.",
+    body: "From your phone or browser, connect Stripe, add your customers, and save your hourly rates and prices.",
   },
   {
-    title: "Say what you did",
-    body: "Leaving the job, tell your band who it’s for, how long it took, and which parts you used. No laptop and no forms.",
+    title: "Record what you did",
+    body: "Leaving the job, record who it’s for, how long it took, and what you used. No laptop and no forms.",
   },
   {
     title: "Confirm and get paid",
@@ -23,11 +23,11 @@ const STEPS = [
 const PROMISES = [
   {
     title: "It asks when something’s unclear",
-    body: "If it can’t tell who the customer is, how long you worked, or what a part costs, Worvo holds the draft and asks you one clear question.",
+    body: "If it can’t tell who the customer is, how long you worked, or what something costs, Worvo holds the draft and asks you one clear question.",
   },
   {
     title: "Your prices, to the cent",
-    body: "The AI only picks out what you said. Every amount comes from your saved rates and parts prices, worked out exactly.",
+    body: "The AI only picks out what you said. Every amount comes from your saved rates and prices, worked out exactly.",
   },
   {
     title: "Nothing goes out without you",
@@ -71,8 +71,8 @@ export function LandingPage() {
                   <span>Send the invoice.</span>
                 </h1>
                 <p className={styles.lede}>
-                  Built for solo plumbers. Tell your wristband what you did on the job, and Worvo writes the invoice
-                  from your own prices, ready to send through Stripe.
+                  Record the job on your wristband. Worvo writes the invoice from your prices, ready to send through
+                  Stripe.
                 </p>
                 <div className={styles.heroForm}>
                   <EarlyAccessForm />
@@ -134,8 +134,8 @@ export function LandingPage() {
                 Be first to try Worvo.
               </h2>
               <p className={styles.accessText}>
-                We’re building Worvo now, starting with solo plumbers who already have their own customers. Leave your
-                email and we’ll write when early access opens.
+                We’re building Worvo now for independent service businesses that already have their own customers.
+                Leave your email and we’ll write when early access opens.
               </p>
             </div>
             <div className={styles.formSlot}>

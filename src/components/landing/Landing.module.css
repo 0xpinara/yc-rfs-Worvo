@@ -192,11 +192,6 @@
   text-wrap: pretty;
 }
 
-.heroForm {
-  max-width: 460px;
-  margin-top: 32px;
-}
-
 .formSlot {
   flex: 1 1 320px;
   max-width: 460px;
@@ -263,6 +258,10 @@
   animation: hello 520ms ease-out 600ms both;
 }
 
+.tallyHello[data-again="true"] {
+  animation-delay: 0ms;
+}
+
 .tallyHello::after {
   content: "";
   position: absolute;
@@ -295,71 +294,6 @@
 
 .tallyBadgePose[data-on="true"] {
   opacity: 1;
-}
-
-.meet {
-  padding: 0 calc(16px + clamp(20px, 5vw, 72px)) clamp(88px, 10vw, 136px);
-}
-
-.meetInner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 48px 96px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.meetCopy {
-  flex: 1 1 340px;
-  max-width: 460px;
-}
-
-.meetText {
-  max-width: 42ch;
-  margin-top: 18px;
-  font-size: 18px;
-}
-
-.poses {
-  display: grid;
-  flex: 1.4 1 480px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 36px 32px;
-  min-width: 0;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.pose {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.poseImg {
-  width: 100%;
-  max-width: 190px;
-  height: auto;
-  margin-bottom: 12px;
-  transition: transform 320ms ease;
-}
-
-.pose:hover .poseImg {
-  transform: translateY(-4px) rotate(-3deg);
-}
-
-.poseTitle {
-  font-size: 19px;
-  font-weight: 600;
-  font-stretch: 104%;
-}
-
-.poseCaption {
-  font-size: 15px;
-  line-height: 1.45;
-  color: var(--ink-soft);
 }
 
 /* ---------- Early-access form ---------- */
@@ -762,7 +696,7 @@
 
 .questionRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
 
@@ -782,13 +716,6 @@
 .questionTitle {
   font-size: 16px;
   font-weight: 600;
-}
-
-.questionText {
-  margin-top: 4px;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--ink-soft);
 }
 
 .answerBtn {
@@ -927,24 +854,7 @@
   color: var(--ink-mute);
 }
 
-.trackSub {
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
-.taxNote {
-  margin: 18px 0 0;
-  font-size: 13px;
-  color: var(--ink-mute);
-  text-align: center;
-}
-
 /* ---------- Shared section type ---------- */
-
-.inner {
-  max-width: 1200px;
-  margin: 0 auto;
-}
 
 .h2 {
   margin: 0;
@@ -953,121 +863,6 @@
   font-stretch: 110%;
   line-height: 1.04;
   letter-spacing: -0.025em;
-}
-
-.h3 {
-  margin: 0;
-  font-size: 21px;
-  font-weight: 600;
-  font-stretch: 104%;
-  letter-spacing: -0.01em;
-}
-
-.body {
-  margin: 10px 0 0;
-  font-size: 17px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-}
-
-/* ---------- How it works ---------- */
-
-.how {
-  padding: 260px calc(16px + clamp(20px, 5vw, 72px)) clamp(88px, 10vw, 136px);
-}
-
-.howTitle {
-  max-width: 16ch;
-}
-
-.steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  gap: 48px 0;
-  list-style: none;
-  margin: clamp(40px, 5vw, 72px) 0 0;
-  padding: 0;
-}
-
-.step {
-  padding-right: 40px;
-}
-
-.stepHead {
-  display: flex;
-  align-items: center;
-}
-
-.stepNum {
-  display: grid;
-  flex: 0 0 auto;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: inset 0 0 0 2px var(--blue);
-  color: var(--blue-deep);
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.stepRule {
-  flex: 1 1 auto;
-  height: 2px;
-  margin-right: -40px;
-  background: var(--rule);
-}
-
-.step:last-child .stepRule {
-  margin-right: 0;
-  background: linear-gradient(90deg, var(--rule), rgba(201, 216, 242, 0));
-}
-
-.stepTitle {
-  margin-top: 28px;
-}
-
-.stepBody {
-  max-width: 34ch;
-}
-
-/* ---------- Trust ---------- */
-
-.trustWrap {
-  padding: 0 16px;
-}
-
-.trust {
-  padding: clamp(56px, 8vw, 112px) clamp(20px, 5vw, 72px);
-  border-radius: 32px;
-  background: #e6eefa;
-}
-
-.trustInner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 48px 96px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.trustTitle {
-  flex: 1 1 340px;
-  max-width: 12ch;
-}
-
-.trustList {
-  display: flex;
-  flex: 1.3 1 420px;
-  flex-direction: column;
-  gap: 40px;
-  min-width: 0;
-}
-
-.trustBody {
-  max-width: 46ch;
 }
 
 /* ---------- Early access ---------- */
@@ -1144,6 +939,189 @@
   letter-spacing: -0.01em;
 }
 
+/* ---------- Hero calls to action ---------- */
+
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.ctaPrimary,
+.ctaGhost {
+  display: inline-flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 26px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.ctaPrimary {
+  background: var(--sky);
+  color: var(--ink);
+}
+
+.ctaGhost {
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(169, 199, 255, 0.45);
+}
+
+.ctaPrimary:hover,
+.ctaGhost:hover {
+  transform: translateY(-2px);
+}
+
+.ctaGhost:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.demoAnchor {
+  scroll-margin-top: 24px;
+}
+
+/* Clickable hero Tally */
+
+.tallyButton {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 40%;
+  background: none;
+  cursor: pointer;
+}
+
+.tallyFigure[data-wiggle="true"] {
+  animation: wiggle 560ms ease, bob 5s ease-in-out 560ms infinite;
+}
+
+/* ---------- How it works, told by Tally ---------- */
+
+.how {
+  padding: 260px calc(16px + clamp(20px, 5vw, 72px)) clamp(88px, 10vw, 136px);
+}
+
+.howInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40px clamp(40px, 7vw, 112px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.howStage {
+  position: relative;
+  flex: 0 1 clamp(240px, 32vw, 420px);
+  aspect-ratio: 1;
+  margin-inline: auto;
+}
+
+.howPose {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: scale(0.94) rotate(-4deg);
+  transition: opacity 420ms ease, transform 520ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.howPose[data-on="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.howCopy {
+  flex: 1 1 380px;
+  min-width: 0;
+}
+
+.howLead {
+  margin: 14px 0 0;
+  font-size: 19px;
+  color: var(--ink-soft);
+}
+
+.howTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 36px;
+}
+
+.howTab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 18px 0 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+}
+
+.howTab:hover {
+  box-shadow: inset 0 0 0 1px var(--blue);
+}
+
+.howTab[aria-selected="true"] {
+  background: var(--stage);
+  color: #fff;
+  box-shadow: none;
+}
+
+.howNum {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--wash);
+  color: var(--blue-deep);
+  font-size: 14px;
+}
+
+.howTab[aria-selected="true"] .howNum {
+  background: var(--sky);
+  color: var(--ink);
+}
+
+.howTimer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--sky);
+  transform-origin: left;
+  animation: timer 3200ms linear both;
+}
+
+.howLine {
+  min-height: 2.6em;
+  margin: 28px 0 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(26px, 2.6vw, 36px);
+  line-height: 1.3;
+  color: var(--ink);
+  animation: rise 420ms ease both;
+}
+
 /* ---------- Motion ---------- */
 
 @keyframes wave {
@@ -1178,6 +1156,81 @@
     opacity: 1;
     transform: none;
   }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  25% {
+    transform: rotate(-6deg) translateY(-6px);
+  }
+
+  60% {
+    transform: rotate(4deg);
+  }
+}
+
+@keyframes timer {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes nudgeA {
+  0%,
+  100% {
+    transform: none;
+  }
+
+  30% {
+    transform: scale(0.97);
+  }
+
+  60% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes nudgeB {
+  0%,
+  100% {
+    transform: none;
+  }
+
+  30% {
+    transform: scale(0.97);
+  }
+
+  60% {
+    transform: scale(1.02);
+  }
+}
+
+.confirmBtn[data-nudge="a"] {
+  animation: nudgeA 260ms ease;
+}
+
+.confirmBtn[data-nudge="b"] {
+  animation: nudgeB 260ms ease;
 }
 
 @keyframes pulse {

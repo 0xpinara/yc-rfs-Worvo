@@ -1,0 +1,39 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
+import { archivo, newsreader } from "@/components/landing/fonts";
+import { WorvoMark } from "@/components/landing/icons";
+import styles from "./App.module.css";
+
+const TABS = [
+  { href: "/app", label: "Record" },
+  { href: "/app/invoices", label: "Invoices" },
+  { href: "/app/prices", label: "Prices" },
+];
+
+export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  return (
+    <div className={`${styles.app} ${archivo.variable} ${newsreader.variable}`}>
+      <header className={styles.bar}>
+        <Link href="/" className={styles.brand} aria-label="Worvo home">
+          <WorvoMark size={24} tone="dark" />
+          <span>worvo</span>
+        </Link>
+        <nav aria-label="App" className={styles.tabs}>
+          {TABS.map((tab) => (
+            <Link key={tab.href} href={tab.href} className={styles.tab} aria-current={pathname === tab.href ? "page" : undefined}>
+              {tab.label}
+            </Link>
+          ))}
+        </nav>
+        <span className={styles.testChip} title="Stripe test mode: no real money moves">
+          Test mode
+        </span>
+      </header>
+      <main className={styles.main}>{children}</main>
+    </div>
+  );
+}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./Landing.module.css";
 import { EarlyAccessForm } from "./EarlyAccessForm";
 import { HeroDemo } from "./HeroDemo";
@@ -28,6 +29,9 @@ export function LandingPage() {
                 <a href="#how" className={styles.navLink}>
                   How it works
                 </a>
+                <Link href="/app" className={styles.navLink}>
+                  Open app
+                </Link>
                 <a href="#access" className={styles.navCta}>
                   Get early access
                 </a>

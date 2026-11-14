@@ -96,3 +96,13 @@ curl -s -X POST 127.0.0.1:3000/api/invoices/<id>/send -H 'content-type: applicat
 ```
 
 Open the `hostedInvoiceUrl`, pay with card `4242 4242 4242 4242` (any future date, any CVC), and within a few seconds `GET /api/invoices/<id>` shows `"paymentStatus":"paid"` (the `stripe listen` terminal shows `invoice.paid`).
+
+## Companion screen (lane C)
+
+Open `http://127.0.0.1:3000/demo` (`src/app/demo/page.tsx`). It shows what the plumber said, the priced invoice, then the QR code and PAID. It has a typed-transcript box as the fallback input and a Send button as the fallback for the double-tap.
+
+The band code drives the same flow through `useInvoiceFlow()` in `src/components/invoices/useInvoiceFlow.ts`. Render the band component inside `InvoiceScreen` and pass it the `flow` object:
+
+- When a band capture finishes: `flow.draftFromTranscript(text, "vexo_ble", sourceId)`.
+- On the double-tap: `flow.send()`. It does nothing unless the invoice is priced with no open questions, and a second tap never sends twice.
+- Light colours: amber while `flow.phase === "draft"`, green when `flow.phase === "paid"`.

@@ -7,7 +7,6 @@ import { MAX_AUDIO_SECONDS } from "@/shared/contracts";
 import { DEMO_TRANSCRIPT } from "@/fixtures/invoice";
 import { useInvoiceFlow } from "@/components/invoices/useInvoiceFlow";
 import { transcribeBandRecording, transcribeBrowserMic } from "@/lib/api/captures-client";
-import { EXPECTED_BAND_NUMBER } from "@/lib/vexo/band-identity";
 import { TALLY_POSES, type TallyPose } from "@/components/landing/tally-art";
 import styles from "./App.module.css";
 import { InvoiceCard } from "./InvoiceCard";
@@ -15,6 +14,9 @@ import { draftSource, messageOf } from "./format";
 import { useBand, type BandLight } from "./useBand";
 import { usePhoneMic } from "./usePhoneMic";
 import fx from "@/components/fx/Fx.module.css";
+
+// Display name only. The connection itself still verifies the team band in band-identity.ts.
+const BAND_LABEL = "Vexo 123";
 
 type Rec = "idle" | "starting" | "recording" | "transcribing";
 
@@ -165,7 +167,7 @@ export function CaptureScreen() {
               <div className={styles.bandPill}>
                 <span className={styles.light} data-light={band.light} aria-hidden="true" />
                 <span>
-                  Band {EXPECTED_BAND_NUMBER}
+                  {BAND_LABEL}
                   <span className={styles.bandSub}>{LIGHT_LABEL[band.light]}</span>
                 </span>
                 <button type="button" className={styles.bandOff} onClick={() => void band.disconnect()} disabled={recording}>
@@ -185,7 +187,7 @@ export function CaptureScreen() {
                   ? "Band needs Chrome or Edge"
                   : bandStatus === "connecting"
                     ? "Connecting…"
-                    : `Connect band ${EXPECTED_BAND_NUMBER}`}
+                    : `Connect ${BAND_LABEL}`}
               </button>
             )}
           </div>
@@ -231,7 +233,7 @@ export function CaptureScreen() {
                 </>
               ) : (
                 <>
-                  <span className={styles.recordLabel}>{bandReady ? `Record on band ${EXPECTED_BAND_NUMBER}` : "Record with this phone"}</span>
+                  <span className={styles.recordLabel}>{bandReady ? `Record on ${BAND_LABEL}` : "Record with this phone"}</span>
                   <button type="button" className={styles.textLink} onClick={() => setTyping((open) => !open)} disabled={busy}>
                     {typing ? "Close" : "Type it instead"}
                   </button>

@@ -1,0 +1,122 @@
+/*
+ * Shared button effect: 3D depth, a tilt + glare that follow the cursor (FxController sets
+ * --rx/--ry/--mx/--my), a press-down on click, and a band of light that sweeps across.
+ * Classes are doubled (.fx.fx) so they win over each button's own single-class styles.
+ * Per-button knobs: --fx-glow (shadow colour), --fx-shine (sweep colour),
+ * --fx-glare-rgb (glare colour as "r, g, b"), --fx-hi / --fx-lo (top highlight / bottom shade),
+ * --fx-delay (when the first sweep starts).
+ */
+
+.fx.fx {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0px))
+    scale(var(--squash, 1));
+  filter: drop-shadow(0 var(--fx-drop, 4px) var(--fx-blur, 8px) var(--fx-glow, rgba(4, 16, 46, 0.32)));
+  transition-property: transform, filter, background-color, color, box-shadow, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fx.fx::before,
+.fx.fx::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Depth: soft top highlight and bottom shade, plus the glare that follows the cursor. */
+.fx.fx::before {
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      circle at var(--mx, 50%) var(--my, 0%),
+      rgba(var(--fx-glare-rgb, 255, 255, 255), var(--glare, 0)) 0%,
+      rgba(var(--fx-glare-rgb, 255, 255, 255), 0) 58%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, var(--fx-hi, 0.34)) 0%,
+      rgba(255, 255, 255, 0) 48%,
+      rgba(4, 16, 46, var(--fx-lo, 0.12)) 100%
+    );
+}
+
+/* Shimmer: a slanted band of light crosses every few seconds, quicker on hover. */
+.fx.fx::after {
+  top: -30%;
+  bottom: -30%;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), var(--fx-shine, rgba(255, 255, 255, 0.62)), rgba(255, 255, 255, 0));
+  transform: translateX(-170%) skewX(-22deg);
+  animation: sweep 4.4s cubic-bezier(0.45, 0, 0.2, 1) var(--fx-delay, 0s) infinite;
+}
+
+.fx.fx:hover:not(:disabled) {
+  --lift: -3px;
+  --glare: 0.55;
+  --fx-drop: 12px;
+  --fx-blur: 22px;
+}
+
+.fx.fx:hover:not(:disabled)::after {
+  animation-duration: 1.7s;
+}
+
+.fx.fx:active:not(:disabled) {
+  --lift: 1px;
+  --squash: 0.97;
+  --fx-drop: 2px;
+  --fx-blur: 5px;
+  transition-duration: 80ms;
+}
+
+.fx.fx:disabled {
+  filter: none;
+}
+
+.fx.fx:disabled::after {
+  opacity: 0;
+  animation: none;
+}
+
+/* Tilt and glare only, no sweep (for tabs and secondary controls). */
+.quiet.quiet::after {
+  display: none;
+}
+
+/* For white or very light buttons, where white light wouldn't show. */
+.light.light {
+  --fx-shine: rgba(169, 199, 255, 0.7);
+  --fx-glare-rgb: 169, 199, 255;
+  --fx-hi: 0;
+  --fx-lo: 0.08;
+}
+
+@keyframes sweep {
+  0%,
+  58% {
+    transform: translateX(-170%) skewX(-22deg);
+  }
+
+  88%,
+  100% {
+    transform: translateX(380%) skewX(-22deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx.fx {
+    transform: none;
+    transition: none;
+  }
+
+  .fx.fx::after {
+    opacity: 0;
+    animation: none;
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useId, useState, type FormEvent } from "react";
 import styles from "./Landing.module.css";
+import fx from "@/components/fx/Fx.module.css";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -56,7 +57,7 @@ export function EarlyAccessForm() {
             setError(false);
           }}
         />
-        <button type="submit" className={styles.primaryBtn}>
+        <button type="submit" className={`${styles.primaryBtn} ${fx.fx}`}>
           Get early access
         </button>
       </div>

@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { archivo, newsreader } from "@/components/landing/fonts";
 import { WorvoMark } from "@/components/landing/icons";
 import styles from "./App.module.css";
+import fx from "@/components/fx/Fx.module.css";
 
 const TABS = [
   { href: "/app", label: "Record" },
@@ -24,7 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
         <nav aria-label="App" className={styles.tabs}>
           {TABS.map((tab) => (
-            <Link key={tab.href} href={tab.href} className={styles.tab} aria-current={pathname === tab.href ? "page" : undefined}>
+            <Link key={tab.href} href={tab.href} className={`${styles.tab} ${fx.fx} ${fx.quiet} ${fx.light}`} aria-current={pathname === tab.href ? "page" : undefined}>
               {tab.label}
             </Link>
           ))}

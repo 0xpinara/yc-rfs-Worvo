@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import styles from "./Landing.module.css";
 import { TALLY_POSES, TALLY_WAVE, type TallyPose } from "./tally-art";
+import fx from "@/components/fx/Fx.module.css";
 
 const HELLOS = ["Hi, I’m Tally.", "Tell me about the job.", "I’ll write it up.", "Double-tap and done.", "Your prices. Always."];
 
@@ -109,7 +110,7 @@ export function TallySteps() {
                 type="button"
                 role="tab"
                 aria-selected={i === active}
-                className={styles.howTab}
+                className={`${styles.howTab} ${fx.fx} ${fx.quiet} ${fx.light}`}
                 onClick={() => {
                   setActive(i);
                   setPaused(true);

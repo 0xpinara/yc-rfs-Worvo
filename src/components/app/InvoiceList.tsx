@@ -8,6 +8,7 @@ import { InvoiceViewSchema, type InvoiceView } from "@/shared/contracts";
 import { TALLY_POSES } from "@/components/landing/tally-art";
 import styles from "./App.module.css";
 import { invoiceStatus, lineSummary, money } from "./format";
+import fx from "@/components/fx/Fx.module.css";
 
 const ListResponse = z.object({ ok: z.literal(true), data: z.object({ invoices: z.array(InvoiceViewSchema) }) });
 
@@ -80,7 +81,7 @@ export function InvoiceList() {
         <div className={styles.emptyState}>
           <Image src={TALLY_POSES.listening.src} alt="" className={styles.emptyTally} unoptimized />
           <p className={styles.emptyTitle}>No invoices yet.</p>
-          <Link href="/app" className={styles.primaryLink}>
+          <Link href="/app" className={`${styles.primaryLink} ${fx.fx}`}>
             Record a job
           </Link>
         </div>

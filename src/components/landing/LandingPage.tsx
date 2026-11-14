@@ -5,6 +5,7 @@ import { HeroDemo } from "./HeroDemo";
 import { archivo, newsreader } from "./fonts";
 import { WorvoMark } from "./icons";
 import { TallyHero, TallySteps } from "./Tally";
+import fx from "@/components/fx/Fx.module.css";
 
 export function LandingPage() {
   return (
@@ -32,7 +33,7 @@ export function LandingPage() {
                 <Link href="/app" className={styles.navLink}>
                   Open app
                 </Link>
-                <a href="#access" className={styles.navCta}>
+                <a href="#access" className={`${styles.navCta} ${fx.fx}`}>
                   Get early access
                 </a>
               </nav>
@@ -46,10 +47,10 @@ export function LandingPage() {
                 </h1>
                 <p className={styles.lede}>Record the job on your wristband. Worvo writes the invoice.</p>
                 <div className={styles.heroCtas}>
-                  <a href="#demo" className={styles.ctaPrimary}>
+                  <a href="#demo" className={`${styles.ctaPrimary} ${fx.fx}`}>
                     Try it
                   </a>
-                  <a href="#access" className={styles.ctaGhost}>
+                  <a href="#access" className={`${styles.ctaGhost} ${fx.fx}`}>
                     Get early access
                   </a>
                 </div>

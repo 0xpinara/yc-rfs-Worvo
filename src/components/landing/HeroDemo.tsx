@@ -5,6 +5,7 @@ import styles from "./Landing.module.css";
 import { CheckIcon, PhoneIcon, ReplayIcon } from "./icons";
 import { TallyBadge } from "./Tally";
 import type { TallyPose } from "./tally-art";
+import fx from "@/components/fx/Fx.module.css";
 import {
   DEMO_ENDS,
   DEMO_JOBS,
@@ -296,7 +297,7 @@ export function HeroDemo() {
                 </span>
                 <div className={styles.questionTitle}>Which parts make up the $45?</div>
               </div>
-              <button type="button" className={styles.answerBtn} onClick={answer}>
+              <button type="button" className={`${styles.answerBtn} ${fx.fx} ${fx.light}`} onClick={answer}>
                 Answer: two shutoff valves
               </button>
             </div>
@@ -332,7 +333,7 @@ export function HeroDemo() {
             <div className={styles.confirm}>
               <button
                 type="button"
-                className={styles.confirmBtn}
+                className={`${styles.confirmBtn} ${fx.fx}`}
                 data-nudge={nudge === 0 ? undefined : nudge % 2 ? "a" : "b"}
                 disabled={!canSend}
                 onClick={tap}

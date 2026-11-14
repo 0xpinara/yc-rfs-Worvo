@@ -7,6 +7,7 @@ import type { FlowPhase } from "@/components/invoices/useInvoiceFlow";
 import styles from "./App.module.css";
 import { Qr } from "./Qr";
 import { invoiceStatus, lineDetail, money, questions } from "./format";
+import fx from "@/components/fx/Fx.module.css";
 
 /** Sends on a second tap within 450 ms, like the band. Works with mouse, touch and keyboard. */
 export function DoubleTapButton({ onSend, label = "Double-tap to send" }: { onSend: () => void; label?: string }) {
@@ -15,7 +16,7 @@ export function DoubleTapButton({ onSend, label = "Double-tap to send" }: { onSe
   return (
     <button
       type="button"
-      className={styles.sendBtn}
+      className={`${styles.sendBtn} ${fx.fx}`}
       data-nudge={nudge === 0 ? undefined : nudge % 2 ? "a" : "b"}
       onClick={(event) => {
         if (event.timeStamp - lastTap.current < 450) {

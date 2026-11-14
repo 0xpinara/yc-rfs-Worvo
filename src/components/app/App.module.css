@@ -307,15 +307,33 @@
   height: 88px;
   border: 0;
   border-radius: 50%;
-  background: var(--sky);
+  background: radial-gradient(circle at 34% 26%, #f1f6ff 0%, #c4d9ff 22%, var(--sky) 52%, #7da2ee 100%);
   color: var(--ink);
-  box-shadow: 0 18px 40px -16px rgba(169, 199, 255, 0.6);
+  box-shadow:
+    inset 0 -7px 14px rgba(29, 63, 184, 0.32),
+    inset 0 5px 10px rgba(255, 255, 255, 0.7),
+    0 20px 44px -16px rgba(169, 199, 255, 0.75),
+    0 4px 10px rgba(4, 16, 46, 0.35);
   cursor: pointer;
-  transition: transform 160ms ease, background-color 200ms ease;
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 200ms ease, background-color 200ms ease;
 }
 
 .recordBtn:hover:not(:disabled) {
-  transform: scale(1.04);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow:
+    inset 0 -7px 14px rgba(29, 63, 184, 0.32),
+    inset 0 5px 10px rgba(255, 255, 255, 0.75),
+    0 26px 56px -14px rgba(169, 199, 255, 0.9),
+    0 6px 14px rgba(4, 16, 46, 0.4);
+}
+
+.recordBtn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.96);
+  box-shadow:
+    inset 0 -3px 8px rgba(29, 63, 184, 0.3),
+    inset 0 7px 12px rgba(29, 63, 184, 0.28),
+    0 8px 18px -10px rgba(169, 199, 255, 0.7);
+  transition-duration: 80ms;
 }
 
 .recordBtn:disabled {
@@ -324,7 +342,7 @@
 }
 
 .recordBtn[data-recording="true"] {
-  background: #fff;
+  background: radial-gradient(circle at 34% 26%, #fff 0%, #eef3fd 60%, #d6e2f7 100%);
 }
 
 .recordBtn[data-recording="true"]::before,
@@ -1128,6 +1146,26 @@
 
 .missing {
   color: #a3321b;
+}
+
+/* ---------- Button light (see components/fx) ---------- */
+
+.connectBtn,
+.typedBtn {
+  --fx-glow: rgba(169, 199, 255, 0.36);
+}
+
+.connectBtn {
+  --fx-hi: 0.12;
+  --fx-shine: rgba(169, 199, 255, 0.5);
+}
+
+.sendBtn {
+  --fx-glow: rgba(47, 91, 234, 0.42);
+}
+
+.primaryLink {
+  --fx-glow: rgba(13, 42, 102, 0.4);
 }
 
 /* ---------- Small screens ---------- */

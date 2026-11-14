@@ -14,6 +14,7 @@ import { InvoiceCard } from "./InvoiceCard";
 import { draftSource, messageOf } from "./format";
 import { useBand, type BandLight } from "./useBand";
 import { usePhoneMic } from "./usePhoneMic";
+import fx from "@/components/fx/Fx.module.css";
 
 type Rec = "idle" | "starting" | "recording" | "transcribing";
 
@@ -174,7 +175,7 @@ export function CaptureScreen() {
             ) : (
               <button
                 type="button"
-                className={styles.connectBtn}
+                className={`${styles.connectBtn} ${fx.fx}`}
                 onClick={() => void band.connect()}
                 disabled={bandStatus === "connecting" || Boolean(band.unavailable)}
                 title={band.unavailable ?? undefined}
@@ -245,7 +246,7 @@ export function CaptureScreen() {
                 Describe the job
               </label>
               <textarea id="typed-job" rows={3} value={text} onChange={(event) => setText(event.target.value)} />
-              <button type="submit" className={styles.typedBtn} disabled={busy || !text.trim()}>
+              <button type="submit" className={`${styles.typedBtn} ${fx.fx}`} disabled={busy || !text.trim()}>
                 Write the invoice
               </button>
             </form>

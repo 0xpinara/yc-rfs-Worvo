@@ -1,9 +1,15 @@
 # Worvo build tasks
 
-Status: implementation not started. This task list replaces the earlier maintenance-team workflow.
+Status: local foundation prepared; T01 remains incomplete until auth, persisted context, and isolation work. Use [PARALLEL_WORK_PLAN.md](PARALLEL_WORK_PLAN.md) for parallel ownership; this list retains product acceptance order.
 Canonical specification: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
 
 For each completed task record: Implemented, Verified (actual command/action and result), Limitations. Unverified provider access stays unchecked.
+
+## Foundation handoff (before parallel work)
+
+- Implemented: Next.js shell, pinned pnpm dependencies/lockfile, Zod wire contracts, band 53 constant, synthetic proposal/invoice fixture, and four contract tests.
+- Verified: `pnpm check` passed typecheck, lint, and 4/4 tests; `pnpm build` generated the static shell on Node 24.14.0. See execution-plan verification note for final dependency check.
+- Limitations: no auth/DB/migrations, extraction, audio, Stripe operations, or provider credentials verified. Fixture total assertions do not implement or test the eventual pricing service. T00 attempted with prior band-53 BLE/motion proof only; recording and authorization gates remain open.
 
 ## T00: Prove the input and send-authorization boundary
 

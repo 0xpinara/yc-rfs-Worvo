@@ -2,6 +2,8 @@
 
 Implement the earliest available task in docs/TASKS.md, then continue through the revised voice-to-invoice draft. Read AGENTS.md, README.md, docs/IMPLEMENTATION_PLAN.md, docs/DEMO.md, and docs/SOURCES.md first. Preserve existing user changes.
 
+If assigned as Person A, B, or C, read docs/PARALLEL_WORK_PLAN.md and start that lane's first independent slice instead. Use the prepared shell/contracts; respect file ownership and coordinate shared changes with B.
+
 The first user is a solo plumber who wants to speak a customer invoice and have it created and sent without opening a computer. Known customers, email recipients, rates, Stripe account, and tax policy are configured once. No technician marketplace, matching, dispatch, inventory, manager approval, or profit dashboard belongs in this draft.
 
 Use one TypeScript/Next.js application, pnpm, Zod, Supabase Auth/PostgreSQL with Drizzle, one extraction model, and Stripe Invoicing in sandbox. Gemini is preferred; OpenAI is an alternative. Deepgram transcribes accessible raw audio; Vexo text skips that step. Optional ElevenLabs/MiniMax output plays on a phone/headphones, not the band.

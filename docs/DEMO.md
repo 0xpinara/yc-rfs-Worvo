@@ -20,7 +20,7 @@ Expected proposal:
 | Shutoff valves | 2 at $22.50 | $45.00 |
 | Fixture total | No assessed demo tax | $225.00 |
 
-The band has no assumed speaker. Show the proposal and status on the companion phone. Optional speech plays through that phone or headphones. Motion/light control is unverified and not needed for the demo.
+The band has no assumed speaker. Show the proposal and status on the companion phone. Optional speech plays through that phone or headphones. Band 53's Python BLE motion stream has been verified on the development laptop; audio, phone integration, gestures and light controls remain unverified and are separate checks.
 
 ## Demonstration sequence
 

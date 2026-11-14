@@ -4,7 +4,7 @@
 
 Worvo helps a solo plumber create and send a customer invoice by speaking to a wearable. Customers and rates are configured once. During a visit, the plumber describes the work and requests an invoice; Worvo extracts the details, checks them, and uses Stripe Invoicing to prepare the invoice and customer payment page.
 
-**Status:** documentation only. No application, wearable command path, Stripe integration, or automated tests have been implemented.
+**Status:** local development foundation ready: Next.js shell, shared Zod contracts, synthetic invoice fixtures, and four contract tests. Authentication, persistence, voice capture, extraction, and Stripe are not implemented.
 
 ## First draft
 
@@ -14,7 +14,7 @@ The target is no computer interaction during invoicing. Initial setup can use a 
 
 The result is a detailed invoice with professional work descriptions, labor/part quantities and rates, totals, and configured terms. Evidence and corrections stay traceable internally. Stripe supplies the customer document and delivery flow; uncertain sends must be reconciled before edits or retries.
 
-The founder describes the Vexo Open band as a microphone, motion sensor, and colour light, with no assumed speaker. Review and exceptions use a companion phone UI. Optional audio plays through the phone or headphones. Motion events and programmable light control remain unverified.
+The Vexo Open kit exposes a microphone, motion sensor, and colour light, with no assumed speaker. Band 53 has connected over Bluetooth and streamed motion on the development laptop. Audio, lights, phone integration, and authenticated band-only authorization remain unverified. Review and exceptions use a companion phone UI.
 
 ## Stripe and AI
 
@@ -30,6 +30,7 @@ Start with one plumber's own Stripe sandbox account. Multi-business onboarding a
 
 | Document | Purpose |
 | --- | --- |
+| [Three-person execution plan](docs/PARALLEL_WORK_PLAN.md) | Parallel owners, file boundaries, shared contracts, checkpoints, and integration tests |
 | [Implementation plan](docs/IMPLEMENTATION_PLAN.md) | Canonical scope, voice authorization boundary, Stripe flow, and acceptance checks |
 | [Tasks](docs/TASKS.md) | Dependency-ordered build |
 | [Demo](docs/DEMO.md) | Canonical utterance and expected invoice |
@@ -37,4 +38,21 @@ Start with one plumber's own Stripe sandbox account. Multi-business onboarding a
 | [Agent prompt](docs/AGENT_PROMPT.md) | Implementation kickoff |
 | [AGENTS.md](AGENTS.md) | Repository rules |
 
-Use one TypeScript application with Next.js, pnpm, Zod, Supabase Auth/PostgreSQL, Drizzle, one extraction provider, and Stripe. Select compatible package versions and actual models during setup. The [.env.example](.env.example) is a planning template; there are no application commands to run yet.
+Use one TypeScript application with Next.js, pnpm, Zod, Supabase Auth/PostgreSQL, Drizzle, one extraction provider, and Stripe. Provider packages and credentials are added by their lane owner when used; there is no live integration yet.
+
+## Local foundation
+
+Use Node 24 (see `.nvmrc`) and pnpm 10.30.3. From this repository:
+
+```powershell
+rtk pnpm install --frozen-lockfile
+rtk pnpm check
+rtk pnpm build
+rtk pnpm dev
+```
+
+Open `http://localhost:3000`. The shell requires no credentials and has no invoice actions. It binds to this computer only. `pnpm check` runs TypeScript, ESLint, and four contract tests; it does not prove arithmetic, authorization, database isolation, or provider behavior. `pnpm build` builds the production shell.
+
+The shared types live in `src/shared/contracts.ts`; `src/fixtures/invoice.ts` is the canonical $225 synthetic review fixture. Its `.invalid` recipient cannot be used for sending. See [the execution plan](docs/PARALLEL_WORK_PLAN.md) before branching.
+
+When integrations need configuration, enter only your authorized credentials privately into ignored `.env.local`, using [.env.example](.env.example) as the variable inventory. There is no runtime provider validator yet. Never commit keys or paste them into chat. No accounts, migrations, live invoices, or deployments were created by the foundation setup.

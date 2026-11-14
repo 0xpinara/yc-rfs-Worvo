@@ -22,7 +22,9 @@ These are documented capabilities, not exercised requests. Account readiness, pe
 
 [Public Vexo documentation](https://www.vexoai.com/docs) was recorded in the prior plan as read-only memory retrieval over MCP with OAuth, including get_context, search_transcripts, get_transcript, and fetch. Recheck current live tool schemas and access before implementation. This update did not independently revalidate the provider interface.
 
-The founder describes Vexo Open as a wrist band with a microphone, motion sensor, and colour light; no speaker is assumed. This is user-supplied information, not a hardware test. Sensor existence does not prove application access, controllable lights, live audio, or authenticated command events.
+The official kit is cloned locally as `../vexo-open-kit`, origin `https://github.com/VexoAI-Org/vexo-open-kit.git`. Its AGENTS.md/getting-started/API documents describe BLE/USB, motion, Opus microphone packets, LED control, and the browser dashboard. This kit is a distinct input path from cloud MCP memory retrieval. No speaker is assumed.
+
+On 2026-11-14, `../.venv/Scripts/python.exe ../connect_watch.py` (from this repo) connected specifically to Vexo-HACK-53, reported firmware 1.1.0, and received 30 real motion readings over three seconds, then disconnected. That proves BLE/motion on the Windows laptop only. No recording, browser-to-app session provenance, phone BLE, LED control, or financial authorization was exercised. The dashboard HTTP endpoint returned 200; its controls were not hardware-tested.
 
 A retrieved transcript provides evidence, not permission to send customer invoices. The fresh band-only authorization mechanism, ingestion timing, raw audio availability, motion events, and light control are unverified. Phone approval remains the fallback; optional audio output comes from the phone or headphones.
 
@@ -43,9 +45,10 @@ Previously consulted official documentation supports these candidate roles. No c
 
 | Check | Result |
 | --- | --- |
+| Band-53 BLE connection and motion | Passed on Windows laptop; firmware 1.1.0, 30 motion samples; disconnected afterward |
 | Real band recording and attributable retrieval | Not run |
 | Fresh authenticated band command bound to exact invoice revision | Unverified; required for band-only send |
-| Motion/light programmatic control | Unverified; optional |
+| Motion/light programmatic control | Motion stream verified via Python; light and gesture controls unverified; optional |
 | Model extraction and raw-audio transcription | Not run |
 | Stripe sandbox customer/draft/finalize/send request | Not run |
 | Hosted test payment and signed webhook reconciliation | Not run |

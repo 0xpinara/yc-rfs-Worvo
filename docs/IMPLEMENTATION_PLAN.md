@@ -1,7 +1,7 @@
 # Worvo implementation plan
 
 **First draft:** a solo plumber creates and sends an invoice by speaking to a wearable.
-**Status:** specification only; application implementation has not started.
+**Status:** local shell, shared contracts, fixtures, and contract tests prepared; product integrations are not implemented. Use [PARALLEL_WORK_PLAN.md](PARALLEL_WORK_PLAN.md) for the three-person execution split.
 
 ## 1. Product and scope
 
@@ -112,6 +112,8 @@ Browser audio uploads are user-initiated, at most 60 seconds and 20 MB, with ser
 | Endpoint | Purpose |
 | --- | --- |
 | POST /api/captures/transcribe | Authenticated bounded upload; create/reuse an attributable capture |
+| POST /api/captures/text | Authenticated bounded typed/bridge transcript; provenance checked server-side |
+| GET /api/setup and PATCH /api/setup | Scoped saved business/customer/rate/policy setup; protected, versioned corrections |
 | POST /api/invoices/draft | Extract a stored capture into a versioned invoice proposal |
 | GET /api/invoices and GET /api/invoices/:id | Business-scoped history, preview, evidence, and current operation status |
 | PATCH /api/invoices/:id | Attributed correction; invalidate prior authorization |

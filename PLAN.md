@@ -6,4 +6,6 @@ The canonical specification is [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION
 
 Use [docs/TASKS.md](docs/TASKS.md) for build order, [docs/DEMO.md](docs/DEMO.md) for the invoice scenario, and [docs/SOURCES.md](docs/SOURCES.md) for integration boundaries.
 
-Status: planning only; implementation has not started.
+Execution: [three-person parallel work plan](docs/PARALLEL_WORK_PLAN.md).
+
+Status: local application shell, shared contracts, fixtures, and contract checks exist. Product integrations have not started.

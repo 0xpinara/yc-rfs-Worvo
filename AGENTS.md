@@ -6,6 +6,8 @@ Read README.md, docs/IMPLEMENTATION_PLAN.md, docs/TASKS.md, docs/DEMO.md, and do
 
 Choose the earliest unfinished task whose dependencies are satisfied. Inspect Git changes first and preserve unrelated work. User instructions take precedence.
 
+For an assigned parallel lane, follow docs/PARALLEL_WORK_PLAN.md ownership and checkpoints. Start that lane's independent fixture work; do not restart scaffolding or edit another lane's files. The canonical acceptance gates still apply.
+
 ## Product priorities
 
 - No computer interaction during the target invoicing flow; initial setup and exceptional review may use a companion phone.

@@ -1,10 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Capture } from "@/shared/contracts";
 import { MAX_AUDIO_SECONDS } from "@/shared/contracts";
-import { DEMO_TRANSCRIPT } from "@/fixtures/invoice";
 import { useInvoiceFlow } from "@/components/invoices/useInvoiceFlow";
 import { transcribeBandRecording, transcribeBrowserMic } from "@/lib/api/captures-client";
 import { TALLY_POSES, type TallyPose } from "@/components/landing/tally-art";
@@ -42,8 +41,6 @@ export function CaptureScreen() {
   const [rec, setRec] = useState<Rec>("idle");
   const [elapsed, setElapsed] = useState(0);
   const [note, setNote] = useState<string | null>(null);
-  const [typing, setTyping] = useState(false);
-  const [text, setText] = useState(DEMO_TRANSCRIPT);
   const recordingFrom = useRef<"band" | "phone">("phone");
 
   const { phase, invoice, transcript, error, send, reset, draftFromTranscript } = flow;
@@ -86,7 +83,6 @@ export function CaptureScreen() {
   async function startRecording() {
     setNote(null);
     setElapsed(0);
-    setTyping(false);
     recordingFrom.current = bandReady ? "band" : "phone";
     setRec("starting");
     try {
@@ -112,14 +108,6 @@ export function CaptureScreen() {
       setRec("idle");
       setNote(messageOf(err, "Couldn’t hear that. Try again."));
     }
-  }
-
-  function submitTyped(event: FormEvent) {
-    event.preventDefault();
-    if (!text.trim() || busy) return;
-    setNote(null);
-    setTyping(false);
-    void draftFromTranscript(text.trim(), "typed_text");
   }
 
   function startOver() {
@@ -234,25 +222,10 @@ export function CaptureScreen() {
               ) : (
                 <>
                   <span className={styles.recordLabel}>{bandReady ? `Record on ${BAND_LABEL}` : "Record with this phone"}</span>
-                  <button type="button" className={styles.textLink} onClick={() => setTyping((open) => !open)} disabled={busy}>
-                    {typing ? "Close" : "Type it instead"}
-                  </button>
                 </>
               )}
             </div>
           </div>
-
-          {typing ? (
-            <form className={styles.typed} onSubmit={submitTyped}>
-              <label htmlFor="typed-job" className={styles.srOnly}>
-                Describe the job
-              </label>
-              <textarea id="typed-job" rows={3} value={text} onChange={(event) => setText(event.target.value)} />
-              <button type="submit" className={`${styles.typedBtn} ${fx.fx}`} disabled={busy || !text.trim()}>
-                Write the invoice
-              </button>
-            </form>
-          ) : null}
 
           {problem ? (
             <p role="alert" className={styles.alert}>

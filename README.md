@@ -56,3 +56,27 @@ Open `http://localhost:3000`. The shell requires no credentials and has no invoi
 The shared types live in `src/shared/contracts.ts`; `src/fixtures/invoice.ts` is the canonical $225 synthetic review fixture. Its `.invalid` recipient cannot be used for sending. See [the execution plan](docs/PARALLEL_WORK_PLAN.md) before branching.
 
 When integrations need configuration, enter only your authorized credentials privately into ignored `.env.local`, using [.env.example](.env.example) as the variable inventory. There is no runtime provider validator yet. Never commit keys or paste them into chat. No accounts, migrations, live invoices, or deployments were created by the foundation setup.
+
+## Invoices and Stripe (lane B)
+
+The server prices every draft from `src/server/invoices/catalog.ts` and keeps invoices in memory; Stripe test mode holds the real invoice.
+
+| Route | Does |
+| --- | --- |
+| `POST /api/invoices/draft` | `{ transcript, source, sourceId? }` → `{ invoice }`. Runs the extractor, prices it, lists anything unclear in `unresolved`. Same `sourceId` returns the same draft. |
+| `GET /api/invoices/:id` | Poll for `sendStatus`, `paymentStatus` and `hostedInvoiceUrl` (show it as a QR code). |
+| `POST /api/invoices/:id/send` | `{ expectedRevision }`. Call on the double-tap. Creates, checks, finalizes and sends one Stripe invoice; a second call returns the same one. Refuses drafts with `unresolved` items. |
+| `POST /api/stripe/webhook` | Signed Stripe events. `invoice.paid` sets `paymentStatus: "paid"`. |
+
+To run it against Stripe on the demo laptop:
+
+1. In `.env.local`, set `STRIPE_SECRET_KEY` (a test key from the Stripe dashboard) and `INVOICE_TEST_RECIPIENT`.
+2. Install the Stripe CLI (`brew install stripe/stripe-cli/stripe` on a Mac), run `stripe login`, then `stripe listen --forward-to 127.0.0.1:3000/api/stripe/webhook`. Put the `whsec_...` it prints in `STRIPE_WEBHOOK_SECRET`.
+3. Start `pnpm dev`, then try the flow without the band:
+
+```bash
+curl -s -X POST 127.0.0.1:3000/api/invoices/draft -H 'content-type: application/json' -d '{"transcript":"Worvo, invoice Juniper Cafe for today'"'"'s sink repair. Ninety minutes of labor at my usual rate and two shutoff valves at the standard price. Send it to their saved billing email.","source":"typed_text"}'
+curl -s -X POST 127.0.0.1:3000/api/invoices/<id>/send -H 'content-type: application/json' -d '{"expectedRevision":1}'
+```
+
+Open the `hostedInvoiceUrl` from the second response, pay with card `4242 4242 4242 4242` (any future date, any CVC), and `GET /api/invoices/<id>` shows `"paymentStatus":"paid"`. Test mode does not email the customer.

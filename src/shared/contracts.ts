@@ -59,6 +59,18 @@ export const InvoiceViewSchema = z.strictObject({
   emailEventObserved: z.boolean(),
   paymentStatus: z.enum(["unpaid", "paid"]),
   paymentCollection: z.enum(["unknown", "stripe", "out_of_band"]),
+  // Stripe's hosted invoice page: the customer pays here (shown as a QR code in the demo).
+  hostedInvoiceUrl: z.url().nullable(),
+});
+
+// What a caller sends to create a draft. The server builds the Capture (id, hash, times).
+// Reuse the same sourceId on a retry and the server returns the same draft.
+export const DraftRequestSchema = z.strictObject({
+  transcript: z.string().trim().min(1).max(10000),
+  source: z.enum(["fixture", "typed_text", "browser_mic", "vexo_ble"]),
+  sourceId: z.string().min(1).max(200).optional(),
+  sessionId: z.string().min(1).max(200).nullable().optional(),
+  capturedAt: z.iso.datetime().optional(),
 });
 
 // Actor/business/recipient/totals are deliberately absent: the server loads them.
@@ -69,6 +81,7 @@ export const RevisionRequestSchema = z.strictObject({
 export type Capture = z.infer<typeof CaptureSchema>;
 export type Proposal = z.infer<typeof ProposalSchema>;
 export type InvoiceView = z.infer<typeof InvoiceViewSchema>;
+export type DraftRequest = z.infer<typeof DraftRequestSchema>;
 
 export type ApiErrorCode =
   | "unauthenticated" | "forbidden" | "not_found" | "invalid_input"

@@ -3,6 +3,7 @@ import { EarlyAccessForm } from "./EarlyAccessForm";
 import { HeroDemo } from "./HeroDemo";
 import { archivo, newsreader } from "./fonts";
 import { WorvoMark } from "./icons";
+import { MeetTally, TallyHero } from "./Tally";
 
 const STEPS = [
   {
@@ -64,19 +65,20 @@ export function LandingPage() {
             </header>
 
             <div className={styles.heroBody}>
-              <h1 className={styles.h1}>
-                <span>Say it.</span>
-                <span>Send the invoice.</span>
-              </h1>
-              <div className={styles.heroRow}>
+              <div className={styles.heroText}>
+                <h1 className={styles.h1}>
+                  <span>Say it.</span>
+                  <span>Send the invoice.</span>
+                </h1>
                 <p className={styles.lede}>
                   Built for solo plumbers. Tell your wristband what you did on the job, and Worvo writes the invoice
                   from your own prices, ready to send through Stripe.
                 </p>
-                <div className={styles.formSlot}>
+                <div className={styles.heroForm}>
                   <EarlyAccessForm />
                 </div>
               </div>
+              <TallyHero />
             </div>
 
             <HeroDemo />
@@ -103,6 +105,8 @@ export function LandingPage() {
           </ol>
         </div>
       </section>
+
+      <MeetTally />
 
       <div className={styles.trustWrap}>
         <section aria-labelledby="trust-title" className={styles.trust}>

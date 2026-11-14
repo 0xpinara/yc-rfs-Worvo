@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import styles from "./Landing.module.css";
-import { BandIcon, CheckIcon, PhoneIcon, ReplayIcon } from "./icons";
+import { CheckIcon, PhoneIcon, ReplayIcon } from "./icons";
+import { TallyBadge } from "./Tally";
+import type { TallyPose } from "./tally-art";
 import {
   DEMO_ENDS,
   DEMO_JOBS,
@@ -14,7 +16,7 @@ import {
   type ScenarioKey,
 } from "./demo-script";
 
-type Phase = "listening" | "drafting" | "held" | "ready" | "sending" | "sent";
+type Phase = "listening" | "drafting" | "held" | "ready" | "sending" | "sent" | "paid";
 
 type DemoState = {
   scenario: ScenarioKey;
@@ -34,6 +36,7 @@ const CHIPS: Record<Phase, { text: string; tone: "neutral" | "question" | "ready
   ready: { text: "Ready to send", tone: "ready" },
   sending: { text: "Sending", tone: "ready" },
   sent: { text: "Sent", tone: "sent" },
+  paid: { text: "Paid", tone: "sent" },
 };
 
 const NOTES: Record<Phase, string> = {
@@ -43,6 +46,18 @@ const NOTES: Record<Phase, string> = {
   ready: "Draft ready. Nothing sends until you confirm.",
   sending: "Sending through Stripe…",
   sent: "Sent. Juniper Cafe gets the invoice with a payment page.",
+  paid: "Paid. Juniper Cafe paid on the Stripe payment page.",
+};
+
+/** Which Tally pose matches each moment of the demo. */
+const POSE: Record<Phase, TallyPose> = {
+  listening: "listening",
+  drafting: "writing",
+  held: "question",
+  ready: "writing",
+  sending: "writing",
+  sent: "writing",
+  paid: "paid",
 };
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
@@ -97,12 +112,18 @@ export function HeroDemo() {
     };
   }, [st.scenario, st.runId, reduced]);
 
-  // "Sending" settles to "sent" after a beat.
+  // After confirming: "sending" settles to "sent", then the sample invoice gets paid.
   useEffect(() => {
-    if (st.phase !== "sending") return;
+    const next: Partial<Record<Phase, { phase: Phase; ms: number }>> = {
+      sending: { phase: "sent", ms: 1100 },
+      sent: { phase: "paid", ms: 1800 },
+    };
+    const step = next[st.phase];
+    if (!step) return;
+    const from = st.phase;
     const id = window.setTimeout(
-      () => setSt((prev) => (prev.phase === "sending" ? { ...prev, phase: "sent" } : prev)),
-      reduced ? 0 : 1100,
+      () => setSt((prev) => (prev.phase === from ? { ...prev, phase: step.phase } : prev)),
+      reduced ? 0 : step.ms,
     );
     return () => window.clearTimeout(id);
   }, [st.phase, reduced]);
@@ -131,7 +152,8 @@ export function HeroDemo() {
   const open = job.lines.some((line) => line.fix && !st.answered);
   const drafted = step >= total && phase !== "listening";
   const canSend = phase === "ready";
-  const sentNow = phase === "sent";
+  const sentNow = phase === "sent" || phase === "paid";
+  const paidNow = phase === "paid";
   const chip = CHIPS[phase];
 
   let confirmNote = "Unlocks when the draft is complete.";
@@ -145,7 +167,11 @@ export function HeroDemo() {
       label: sentNow ? "Sent through Stripe" : "Sending through Stripe",
       sub: "Email with a payment page and PDF",
     },
-    { state: "next", label: "Paid", sub: "Shows here when Juniper Cafe pays" },
+    {
+      state: paidNow ? "done" : "next",
+      label: "Paid",
+      sub: paidNow ? "Paid on the Stripe payment page" : "Shows here when Juniper Cafe pays",
+    },
   ] as const;
 
   return (
@@ -187,6 +213,7 @@ export function HeroDemo() {
             <span className={styles.quoteMark}>”</span>
           </p>
           <div aria-live="polite" className={styles.status}>
+            <TallyBadge pose={POSE[phase]} />
             {phase === "listening" ? (
               <span className={styles.wave} aria-hidden="true">
                 <span />
@@ -195,9 +222,7 @@ export function HeroDemo() {
                 <span />
                 <span />
               </span>
-            ) : (
-              <BandIcon className={styles.bandIcon} />
-            )}
+            ) : null}
             <span>{NOTES[phase]}</span>
           </div>
         </div>
@@ -282,7 +307,7 @@ export function HeroDemo() {
             </span>
           </div>
 
-          {phase === "sending" || phase === "sent" ? (
+          {phase === "sending" || phase === "sent" || phase === "paid" ? (
             <ol aria-label="Invoice status" className={styles.track}>
               {track.map((mark) => (
                 <li key={mark.label} className={styles.trackItem}>

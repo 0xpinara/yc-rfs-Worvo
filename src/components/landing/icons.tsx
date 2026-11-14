@@ -20,17 +20,6 @@ export function ReplayIcon() {
   );
 }
 
-/** The wristband, shown once Worvo has stopped listening. */
-export function BandIcon({ className }: { className?: string }) {
-  return (
-    <svg className={`${styles.ic} ${className ?? ""}`} width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="6.5" y="7" width="11" height="10" rx="3" />
-      <path d="M8.5 7V3.5h7V7" />
-      <path d="M8.5 17v3.5h7V17" />
-    </svg>
-  );
-}
-
 export function PhoneIcon() {
   return (
     <svg className={styles.ic} width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">

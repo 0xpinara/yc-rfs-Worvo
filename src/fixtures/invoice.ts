@@ -36,4 +36,5 @@ export const DEMO_INVOICE: InvoiceView = {
   emailEventObserved: false,
   paymentStatus: "unpaid",
   paymentCollection: "unknown",
+  hostedInvoiceUrl: null,
 };

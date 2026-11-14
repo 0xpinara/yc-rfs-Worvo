@@ -1,6 +1,6 @@
 # WORVO — Project Plan
 
-**Say it. Get it done.** An AI-native operating system for physical work.
+**Say it. Get it done.** Detailed customer invoices generated from collected voice data, reviewed, and sent.
 
 The canonical specification is [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md). Start there for the complete product scope, YC alignment, wearable capability boundary, architecture, data model, business rules, API contract, and acceptance criteria.
 

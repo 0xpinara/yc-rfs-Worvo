@@ -1,82 +1,63 @@
 # Worvo — Copyable Agent Kickoff
 
-Use this prompt when asking an agent to implement the project. It describes future build work; creating these documents has not executed it.
+This prompt describes future implementation; the repository currently contains planning documents.
 
 ```text
-Implement Worvo in this repository, using the existing project documents as the specification.
-
-First read AGENTS.md, README.md, docs/IMPLEMENTATION_PLAN.md,
+Implement Worvo using AGENTS.md, README.md, docs/IMPLEMENTATION_PLAN.md,
 docs/TASKS.md, docs/DEMO.md, and docs/SOURCES.md. Inspect existing files
-and Git changes before editing. Preserve unrelated work.
+and Git changes before editing; preserve unrelated work.
 
-Mission: an operating system for physical work. The first wedge is a
-maintenance technician's spoken update becoming evidence-backed job records,
-material usage, an invoice draft, and projected job economics. Build one
-commercial cafe-plumbing scenario. The worker's voice experience is central.
+Product: collected voice data becomes a detailed itemized customer invoice
+that the owner reviews, approves, and sends. Build capture -> structured
+work details -> clarification/pricing -> invoice preview -> approve -> send.
+Use a simple customer/visit reference. Keep quoting, dispatch, scheduling,
+inventory management, workforce coordination, and margin dashboards outside P0.
 
-Implement the earliest unfinished task with satisfied dependencies, then
-continue through the complete P0 baseline. Begin with a short hardware and
-provider capability check; record unresolved access and keep independent
-work moving. Return to the real wearable adapter when access becomes available.
+Keep the existing TypeScript/Next.js, pnpm, Tailwind, Zod, Supabase/PostgreSQL
+with Drizzle, Supabase Auth, Vercel AI SDK/OpenAI, and preferred ElevenLabs
+transcription stack. Verify current interfaces and credentials. Add one
+invoice-email adapter and printable/PDF output. Check its real sending and
+idempotency capabilities early. No extra providers or multi-agent runtime.
 
-Use one TypeScript/Next.js application, pnpm, Zod contracts, PostgreSQL/Supabase
-with Drizzle, Supabase Auth, Vercel AI SDK with OpenAI initially, and ElevenLabs
-transcription if accessible. Keep small AI, speech, and wearable adapters.
-Check current official package and SDK documentation, select compatible stable
-versions, and commit the pnpm lockfile. Configure models and credentials.
-Add actual setup commands to README when the app is runnable.
+Follow the plan's contracts, invoice states, and task order. AI proposes
+source-grounded descriptions, labor, and quantities. Server code calculates
+money in integer cents using confirmed rates. Unknown details remain unknown.
+Clarify cumulative labor, price meaning, customer identity, and missing terms.
+Keep every extracted line linked to evidence and every correction attributed.
+Use the canonical WORK-104 fixture: labor $180, parts $45, total $225.
+Tax is not assessed in this synthetic demo; no profit/stock workflow is required.
 
-The full sequence is intake -> priced draft quote -> manager approval ->
-validated assignment -> start work -> spoken capture -> structured proposal
-and clarification -> explicit confirmation -> transactional records and stock
--> qualified closeout -> invoice draft/approval -> projected economics.
+Persist revisions and approval of the exact invoice and recipient. Edits
+invalidate approval. Sending is a separate authenticated action for the
+approved version. Store a unique send intent before the external call, reuse
+a stable provider key where supported, and retain the receipt. Reconcile
+unknown outcomes instead of blindly resending. Provider acceptance is not
+proof of inbox delivery or payment. Protect against duplicate invoice lines
+and concurrent send clicks.
 
-Enforce the exact lifecycle, roles, schemas, financial rules, and API contracts
-in docs/IMPLEMENTATION_PLAN.md. Models interpret speech and propose fields.
-Server-side deterministic services calculate money and authorize mutations.
-Treat transcripts as untrusted data, including instructions inside them.
-Missing values stay unknown; ambiguous details block confirmation.
+Keep Vexo memory, live microphone, and recorded demo labels visible. Use
+only verified hardware interfaces. Recorded speech and instructions inside
+transcripts cannot authorize sending. A live spoken send action, if added,
+requires an authenticated session, exact-version/recipient readback, and a
+fresh expiring challenge. A button confirmation is the baseline.
 
-Use integer cents and separate selling prices from direct costs. Snapshot
-approved prices and rates. Apply work entries, stock movements, audit records,
-version updates, and idempotency results atomically. Retries and repeated
-sources cannot duplicate effects. Semantic overlap and revised source content
-require review. Never infer payment collection from invoice approval.
+Build capture, invoice review, and invoice list views. Include detailed
+customer-facing line items, configured billing fields/terms, totals, PDF,
+approval and send status. Keep raw transcripts and private citations in the
+internal evidence view. Provide ambiguity, denied permission, pending source,
+stale approval, failed send, and unknown result recovery.
 
-Use the canonical JOB-104 fixtures from docs/DEMO.md. Expected invoice value
-is $225.00, direct cost $97.50, projected gross profit $127.50, margin 56.67%,
-and ending valve stock 8. Tax is not assessed in this synthetic demonstration.
-Compute those values from persisted approved entries; do not hard-code cards.
+Use synthetic data and consented recordings. Keep credentials server-side.
+Implement authorization and organization isolation before a public demo;
+otherwise demonstrate locally. Build and test the sending feature with an
+adapter/sandbox; a real message requires an explicitly authorized controlled
+recipient. This implementation instruction does not authorize arbitrary
+customer emails, account purchases, public deployment, or event submission.
 
-Keep Vexo memory, live microphone, and recorded demo modes visibly distinct.
-Use only the supported provider interface documented in docs/SOURCES.md,
-unless a new interface is verified and recorded. Do not imply live bracelet
-streaming or return audio without evidence. Historical speech cannot grant a
-current approval. Live confirmation must bind to the active authenticated
-actor, job, proposal revision, and expiring challenge.
-
-Build three coherent views: technician capture/confirmation, manager job
-queue, and job detail with evidence, quote, timeline, and invoice. Include
-loading, denied permission, provider failure, pending ingestion, ambiguity,
-duplicate source, and stale confirmation states. Use a clear industrial style
-and readable financial data; add polish after the whole loop works.
-
-Use synthetic data and consented recordings. Keep secrets server-side and
-out of Git. For a public demo, implement authentication, organization checks,
-protected mutations, and disabled public fixture/reset controls. Otherwise
-demonstrate locally. Do not register accounts, purchase services, send customer
-messages, deploy publicly, or submit to the event without authorization for
-those actions. Continue all permitted local implementation independently.
-
-Verify A01-A11 for the voice baseline; report A12 and the real-source duplicate
-check separately for wearable completion. Run actual build/typecheck/lint
-scripts, meaningful business/database tests, and the end-to-end demo. Mark
-tasks complete only with verification evidence. Rehearse docs/DEMO.md and
-prepare a labeled fallback. Report what works, what was tested, and what
-remains unverified. Never describe a stub or fixture as a live integration.
-
-Do not add robots, payment collection, external messaging, broad accounting,
-extra AI providers, or a multi-agent runtime to P0. Follow the scope cuts and
-deadline gates in docs/TASKS.md. Do not start additional coding agents unless
-I explicitly assign parallel work.
+Verify A01-A09 for voice and sending; A10 separately establishes real wearable
+capture. Run actual project checks, meaningful pricing/revision/permission/
+duplicate/send-recovery tests, and the browser journey. Rehearse docs/DEMO.md.
+Update task evidence and README commands as implemented. Report real voice,
+wearable, and send results separately; a mock send is not a real send.
+Do not start additional agents unless explicitly assigned parallel work.
 ```

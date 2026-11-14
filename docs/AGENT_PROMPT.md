@@ -1,3 +1,5 @@
+> **Post-hackathon plan.** For the hackathon build, [AGENTS.md](../AGENTS.md) is the scope. Do not implement this document today.
+
 # Worvo implementation kickoff
 
 Implement the earliest available task in docs/TASKS.md, then continue through the revised voice-to-invoice draft. Read AGENTS.md, README.md, docs/IMPLEMENTATION_PLAN.md, docs/DEMO.md, and docs/SOURCES.md first. Preserve existing user changes.

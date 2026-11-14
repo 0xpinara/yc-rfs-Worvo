@@ -1,5 +1,9 @@
-# CLAUDE.md
+# Worvo project context
 
-Follow [AGENTS.md](AGENTS.md) (rules, ownership, commands) and [PLAN.md](PLAN.md) (full spec). Both are authoritative.
+Read and follow [AGENTS.md](AGENTS.md) before making changes.
 
-Default role for Claude Code on this repo: **frontend owner** (`src/app/**/page.tsx`, `src/components/**`, `tests/e2e/**`, branch prefix `fe/`), unless the user assigns a different role.
+The canonical specification is [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
+Choose implementation work from [docs/TASKS.md](docs/TASKS.md).
+Use [docs/DEMO.md](docs/DEMO.md) for shared fixtures and acceptance numbers.
+
+This file is an entry point for Claude Code. Keep project rules in `AGENTS.md` to avoid divergent instructions.

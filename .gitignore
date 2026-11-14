@@ -1,8 +1,33 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.aws/
+
+# Dependencies and build output
 node_modules/
 .next/
-.env
-.env*.local
-.DS_Store
+out/
+dist/
+build/
 coverage/
 playwright-report/
 test-results/
+*.tsbuildinfo
+
+# Local databases, recordings, and provider credentials
+.supabase/
+supabase/.temp/
+*.db
+*.db-shm
+*.db-wal
+.local/
+recordings/
+oauth-tokens/
+
+# OS and editor files
+.DS_Store
+*.log
+.idea/

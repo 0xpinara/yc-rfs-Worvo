@@ -26,7 +26,9 @@ The official kit is cloned locally as `../vexo-open-kit`, origin `https://github
 
 On 2026-11-14, `../.venv/Scripts/python.exe ../connect_watch.py` (from this repo) connected specifically to Vexo-HACK-53, reported firmware 1.1.0, and received 30 real motion readings over three seconds, then disconnected. That proves BLE/motion on the Windows laptop only. No recording, browser-to-app session provenance, phone BLE, LED control, or financial authorization was exercised. The dashboard HTTP endpoint returned 200; its controls were not hardware-tested.
 
-A retrieved transcript provides evidence, not permission to send customer invoices. The fresh band-only authorization mechanism, ingestion timing, raw audio availability, motion events, and light control are unverified. Phone approval remains the fallback; optional audio output comes from the phone or headphones.
+**A3 kit integration (2026-11-14):** Worvo vendors the official kit JS client under `third_party/vexo-open-kit/js/src` (MIT; synced from sibling `../vexo-open-kit`) and drives `Band.connect(53)`, GET_INFO number verify, `configure({ audio: true })`, `BandAudio` → 16 kHz WAV → server Deepgram with `mip_opt_out`. UI: `/capture` (`BandCapture`). Formats from kit docs: Opus 50/s × 20 ms, 16 kHz mono; WebCodecs on Chrome/Edge; not iOS Safari. **Not run in this agent session:** live band mic on hardware (requires Chrome + double-tap band 53). Laptop Python motion remains the prior hardware evidence; phone no-computer path still needs phone BLE proof.
+
+A retrieved transcript provides evidence, not permission to send customer invoices. The fresh band-only authorization mechanism, ingestion timing, raw audio availability, motion events, and light control are unverified. Authenticated phone approval remains the fallback when the live band-command path is unproven; optional audio output comes from the phone or headphones.
 
 ## Other sponsor capabilities
 
@@ -46,10 +48,14 @@ Previously consulted official documentation supports these candidate roles. No c
 | Check | Result |
 | --- | --- |
 | Band-53 BLE connection and motion | Passed on Windows laptop; firmware 1.1.0, 30 motion samples; disconnected afterward |
-| Real band recording and attributable retrieval | Not run |
-| Fresh authenticated band command bound to exact invoice revision | Unverified; required for band-only send |
+| Real band recording and attributable retrieval | Not run (A3 chooser scaffolded; kit audio path not hardware-tested in-app) |
+| Fresh authenticated band command bound to exact invoice revision | Unverified; required for band-only send (A10) |
 | Motion/light programmatic control | Motion stream verified via Python; light and gesture controls unverified; optional |
-| Model extraction and raw-audio transcription | Not run |
+| Model extraction (Gemini) | Live smoke 2026-11-14: `AI_MODEL=gemini-3.8-flash` returned Juniper Cafe / 90 min / 1 material / send_requested; forbidden email absent; unresolved rate cues preserved. Keys not recorded. |
+| Raw-audio transcription (Deepgram) | Adapter + `mip_opt_out` unit-tested; live audio smoke not run in this session |
+| Capture text/transcribe routes | Implemented against injectable `requireBusinessContext` / memory `saveCapture`; demo identity when DEMO flags set |
+| Capture → invoice draft | `/capture` posts transcripts to B's `POST /api/invoices/draft` (pull 2026-11-14: Stripe sandbox invoices on main) |
+| Browser Web Bluetooth + kit Band.connect(53) | Integrated on `/capture`; live hardware chooser not exercised in agent environment |
 | Stripe sandbox customer/draft/finalize/send request | Not run |
 | Hosted test payment and signed webhook reconciliation | Not run |
 | Actual invoice email delivery | Not run; test-mode send cannot prove it |

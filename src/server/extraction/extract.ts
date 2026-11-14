@@ -215,11 +215,31 @@ function fixtureProposal(): Proposal {
   };
 }
 
+export type ExtractProposalOptions = {
+  /** When true, call Gemini after fixture miss (requires key + AI_MODEL). Default false keeps tests offline. */
+  useProvider?: boolean;
+  apiKey?: string | null;
+  model?: string | null;
+  fetchFn?: typeof fetch;
+};
+
+function providerEnabledByEnv(): boolean {
+  const provider = process.env.AI_PROVIDER?.trim().toLowerCase() ?? "google";
+  if (provider !== "google") return false;
+  const key = process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim() ?? "";
+  const model = process.env.AI_MODEL?.trim() ?? "";
+  return key.length > 0 && model.length > 0;
+}
+
 /**
- * Pure extraction entry point: labeled fixture match or bounded heuristic
- * normalization. No provider network calls.
+ * Extraction entry point: labeled fixture → optional Gemini → bounded heuristic.
+ * Provider results are untrusted and must pass proposalFromCandidate.
+ * No approval, totals, email, or business identity may be set.
  */
-export async function extractProposal(capture: Capture): Promise<Proposal> {
+export async function extractProposal(
+  capture: Capture,
+  options: ExtractProposalOptions = {},
+): Promise<Proposal> {
   const transcript = normalizeTranscript(capture.transcript);
   if (transcript.length === 0) {
     return proposalFromCandidate(capture.transcript, null);
@@ -227,6 +247,20 @@ export async function extractProposal(capture: Capture): Promise<Proposal> {
 
   if (transcriptsMatch(transcript, DEMO_TRANSCRIPT) || capture.sourceId === "canonical-utterance-v1") {
     return fixtureProposal();
+  }
+
+  const useProvider = options.useProvider ?? providerEnabledByEnv();
+  if (useProvider) {
+    const { extractWithGemini } = await import("./gemini");
+    const outcome = await extractWithGemini(transcript, {
+      apiKey: options.apiKey,
+      model: options.model,
+      fetchFn: options.fetchFn,
+    });
+    if (outcome.ok) {
+      return proposalFromCandidate(transcript, outcome.candidate);
+    }
+    // Local heuristic only — do not auto-fallback to another vendor.
   }
 
   return proposalFromCandidate(transcript, heuristicCandidate(transcript));

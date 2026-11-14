@@ -17,3 +17,7 @@ export type {
   RecorderController,
   RecorderControllerDeps,
 } from "./recorder-controller";
+export { BandConnect } from "./BandConnect";
+export type { BandConnectProps, BandConnectProvenance } from "./BandConnect";
+export { BandCapture } from "./BandCapture";
+export type { BandCaptureProps } from "./BandCapture";

@@ -10,8 +10,17 @@ export function normalizeTranscript(raw: string): string {
   return collapsed.slice(0, MAX_TRANSCRIPT_CHARS);
 }
 
+/** Collapse common STT brand mishears before comparing to the demo fixture. */
+export function normalizeForFixtureMatch(raw: string): string {
+  return normalizeTranscript(raw)
+    .toLowerCase()
+    .replace(/\bvorvo\b/g, "worvo")
+    .replace(/\bwervo\b/g, "worvo")
+    .replace(/\bwarvo\b/g, "worvo");
+}
+
 export function transcriptsMatch(a: string, b: string): boolean {
-  return normalizeTranscript(a).toLowerCase() === normalizeTranscript(b).toLowerCase();
+  return normalizeForFixtureMatch(a) === normalizeForFixtureMatch(b);
 }
 
 /** Evidence must appear as a contiguous excerpt of the source transcript. */

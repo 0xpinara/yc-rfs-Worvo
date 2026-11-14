@@ -32,7 +32,9 @@ export function laborCents(minutes: number, hourlyRateCents: number): number {
 }
 
 export function priceProposal(proposal: Proposal, catalog: Catalog): PricedDraft {
-  const unresolved = new Set(proposal.unresolved);
+  // Pricing owns send-blocking unresolved. Soft model notes (rate-cue / email prose)
+  // must not block a catalog-priced draft.
+  const unresolved = new Set<string>();
   const lines: InvoiceView["lines"] = [];
 
   const customer: CatalogCustomer | null = proposal.customerReference

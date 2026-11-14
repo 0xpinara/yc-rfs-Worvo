@@ -27,9 +27,27 @@ Keep these input paths distinct:
 
 If Vexo supplies usable text, send that to extraction without another transcription pass. Do not assume live band streaming, raw audio access, gestures, programmable lights, or fast ingestion from the existence of hardware.
 
-The target band-only send requires a provider mechanism that establishes a fresh command from the authenticated plumber and binds it to the exact invoice revision, customer, line amounts, and send intent. Demonstrate this mechanism before enabling it. A retrieved phrase such as “send it” or voice similarity alone is insufficient. Do not replay old commands or accept transcript instructions as tool authority.
+### Decision (2026-11-14): band-only send is the primary demo path
 
-When that gate is unavailable, the honest fallback is: band evidence creates a draft; the plumber confirms on their authenticated phone. This removes the computer but does not satisfy the fully hands-free send gate. Keep that limitation explicit.
+The founder confirmed that band 53's audio reaches the app live. **The primary flow is band-only:** the plumber speaks, and a fully resolved invoice is created and sent in the Stripe sandbox with no phone or computer interaction. Phone approval is now the fallback and the exception path, not the default.
+
+A **live band command** authorizes a send only when **all** of these hold. The server checks every one and records them in the authorization:
+
+1. **Live source.** The capture arrived over the live BLE audio path from exactly `Vexo-HACK-53`. The band was connected inside the plumber's authenticated app session (the device holding the BLE connection). Server receipt is within 120 seconds of capture end.
+2. **Explicit intent in the same utterance.** The utterance itself says to send ("send it", "send the invoice"). Intent from a different or earlier capture does not count.
+3. **Fully resolved draft.** The customer matches exactly one saved record. The recipient is that customer's saved verified email. Every price comes from the saved catalog or rates. There are no ambiguities, no duplicate-visit flag, and the tax policy is configured.
+4. **Bound snapshot.** The authorization stores `method: live_band_command`, actor, captureId, draft revision, recipient, line/total snapshot hash and intent. It authorizes only that revision.
+5. **Single use.** One capture can authorize at most one send. Repeated or retried processing of the same capture reuses the same operation and invoice.
+6. **Sandbox only.** Reject live Stripe keys and `livemode` objects.
+
+These never auto-send. They create a draft held for review on the companion screen:
+- Vexo cloud memory or other retrieved transcripts
+- recorded or fixture audio
+- any capture failing a rule above
+
+A motion gesture may **cancel** during an optional short hold before finalize. It can never approve. If the LED is controllable, it shows sent or needs-review, with the same status mirrored in the companion UI.
+
+**Fallback** (live band path fails during the demo): the phone microphone captures, and the plumber approves on the authenticated phone. State this honestly; it does not count as A10.
 
 No band speaker means the system cannot rely on a conversational audio readback from the wrist. Use a self-contained command for known customer/rate cases. If a detail is missing, hold the draft and show a concrete question in the companion UI. Optional ElevenLabs/MiniMax readback plays through a phone or headphones.
 
@@ -42,7 +60,7 @@ Motion/light experiments are optional. A verified gesture may request capture, n
 3. Resolve the customer uniquely from saved records and resolve selling prices from the business's catalog. “Usual rate” is valid only when a configured snapshot exists. Never infer an email, amount, or tax exemption.
 4. Calculate the invoice in integer cents. Display the source excerpt and proposed line items in the companion UI.
 5. Persist a versioned draft. Unknown customer, ambiguous amount, missing price, unclear labor basis, duplicate work, or unresolved tax configuration leaves it pending clarification.
-6. Obtain authorization for that exact draft through the proven fresh-command mechanism or authenticated phone action. Editing a draft invalidates prior authorization.
+6. Obtain authorization for that exact draft: automatically from a qualifying live band command (§2 decision), otherwise through authenticated phone approval. Editing a draft invalidates prior authorization.
 7. Create and populate a Stripe draft, finalize it, and request sending through Stripe Invoicing.
 8. Store the hosted invoice/PDF references privately and track sending and payment through Stripe events.
 
@@ -160,7 +178,7 @@ Build a small companion setup/review screen and invoice history with source, lin
 | A07 | A sandbox hosted invoice accepts a test payment and reconciles to paid without implying real funds or delivered email |
 | A08 | Real microphone path works; permission denial, silence, provider failure, and missing details recover |
 | A09 | A real band recording reaches an attributable invoice draft; source timing and provenance are shown |
-| A10 | A fresh band command can authorize the exact invoice send with no phone/computer interaction; prove the mechanism or leave this gate incomplete |
+| A10 | **Primary demo path.** A live band-53 command with explicit send intent produces one sandbox Stripe invoice with no phone/computer interaction; retrieved memory, fixtures, and unresolved drafts never auto-send |
 | A11 | Invoice preview, Stripe lines/PDF, recipient, and send payload match the authorized revision; customer output excludes private evidence |
 | A12 | Pending/unknown sends block edits and blind retries; draft correction invalidates authorization; finalized invoices retain their original history |
 

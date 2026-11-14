@@ -4,9 +4,14 @@ This is the execution split for the canonical [implementation plan](IMPLEMENTATI
 
 ## Outcome and gates
 
-Ship: attributable voice capture → proposed invoice → server-priced $225.00 draft → authenticated phone review/approval → one Stripe sandbox invoice → hosted test payment → webhook-reconciled payment state. The invoice contains 90 minutes at $120/hour ($180) and two valves at $22.50 ($45). No tax is assessed in the synthetic scenario; real tax policy is not inferred.
+Ship: **live band-53 voice command** → proposed invoice → server-priced $225.00 draft → **auto-authorized live band command** → one Stripe sandbox invoice → hosted test payment → webhook-reconciled payment state. The invoice contains 90 minutes at $120/hour ($180) and two valves at $22.50 ($45). No tax is assessed in the synthetic scenario; real tax policy is not inferred.
 
-The primary deliverable uses authenticated phone confirmation. Band-only sending is a separately gated stretch objective (A10), never a requirement that blocks the safe fallback. No wrist speaker is assumed. No dispatch, inventory, recruiting, dashboards for profit, TTS, second model, or custom PDF/email renderer.
+**Decision (2026-11-14): band-only is the primary deliverable.** The founder confirmed that band audio reaches the app live. A10 is now the main demo path, under the rules in IMPLEMENTATION_PLAN.md §2. Authenticated phone approval is the fallback and exception path (unresolved drafts, retrieved memory, band failure). No wrist speaker is assumed. No dispatch, inventory, recruiting, dashboards for profit, TTS, second model, or custom PDF/email renderer.
+
+**Lane impact:**
+- **A** prioritizes the live band audio path (A3/A4 before polish). A sends B the capture's live-BLE provenance: band name, session, capture start/end, and server receipt time.
+- **B** adds `authorizeFromLiveBandCommand(context, captureId)`, which checks every §2 rule and auto-chains into the existing send operation. The phone `authorize` route stays for the fallback.
+- **C** makes the companion screen a status view (listening → draft → sent → paid) that needs no taps in the happy path, and keeps the review/approve UI for exceptions.
 
 ## What has been prepared
 

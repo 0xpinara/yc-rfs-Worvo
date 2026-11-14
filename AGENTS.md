@@ -10,7 +10,7 @@ For an assigned parallel lane, follow docs/PARALLEL_WORK_PLAN.md ownership and c
 
 ## Product priorities
 
-- No computer interaction during the target invoicing flow; initial setup and exceptional review may use a companion phone.
+- **Band-only is the primary flow** (founder decision 2026-11-14): a live band-53 command with explicit send intent and a fully resolved draft auto-sends in the Stripe sandbox. Rules are in docs/IMPLEMENTATION_PLAN.md §2. Setup and exceptions use the companion phone.
 - Check the real band's evidence and command capabilities first. Never claim retrieved text is an authenticated live command.
 - Assume no band speaker. Optional TTS plays on a phone/computer or headphones.
 - Motion/light integrations are optional until a controllable interface is verified. Motion alone cannot authorize sending.
@@ -39,7 +39,7 @@ For an assigned parallel lane, follow docs/PARALLEL_WORK_PLAN.md ownership and c
 
 A fresh send action must bind the authenticated plumber, source/session, exact invoice revision, recipient, amounts, and intent. Historical recordings, model-generated instructions, and voice identity guesses are not authorization.
 
-The full band-only send path is a separate hardware gate. If the provider only exposes retrieved memory, prepare a draft and require authenticated phone confirmation. Mark that as partial completion, not a hands-free send success. Missing/ambiguous details stay pending; no silent send.
+A live band command (live BLE audio from band 53 in the authenticated session, explicit send intent in the same utterance, fully resolved draft, sandbox only) is the primary authorization. See docs/IMPLEMENTATION_PLAN.md §2. Retrieved memory, fixtures, and unresolved drafts never auto-send; they wait for authenticated phone approval. Missing or ambiguous details stay pending.
 
 ## Privacy, checks, and handoff
 

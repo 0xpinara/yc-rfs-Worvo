@@ -11,7 +11,7 @@ export type DemoLineContent = { name: string; detail: string; cents: number };
 export type DemoLine = DemoLineContent & {
   id: PartKey;
   quote: string;
-  /** Present when the spoken line is ambiguous; shown after the plumber answers the question. */
+  /** Present when the spoken line is ambiguous; shown after the worker answers the question. */
   fix?: DemoLineContent & { note: string };
 };
 

@@ -68,15 +68,31 @@ The server prices every draft from `src/server/invoices/catalog.ts` and keeps in
 | `POST /api/invoices/:id/send` | `{ expectedRevision }`. Call on the double-tap. Creates, checks, finalizes and sends one Stripe invoice; a second call returns the same one. Refuses drafts with `unresolved` items. |
 | `POST /api/stripe/webhook` | Signed Stripe events. `invoice.paid` sets `paymentStatus: "paid"`. |
 
-To run it against Stripe on the demo laptop:
+### Stripe setup on the demo laptop
 
-1. In `.env.local`, set `STRIPE_SECRET_KEY` (a test key from the Stripe dashboard) and `INVOICE_TEST_RECIPIENT`.
-2. Install the Stripe CLI (`brew install stripe/stripe-cli/stripe` on a Mac), run `stripe login`, then `stripe listen --forward-to 127.0.0.1:3000/api/stripe/webhook`. Put the `whsec_...` it prints in `STRIPE_WEBHOOK_SECRET`.
-3. Start `pnpm dev`, then try the flow without the band:
+No Stripe account is needed: the CLI creates a test sandbox (it expires after 7 days). Run these in a terminal (PowerShell on Windows), in order.
+
+1. Install the Stripe CLI. On Windows with Scoop: `scoop bucket add stripe https://github.com/stripe/scoop-stripe-cli.git`, then `scoop install stripe` (without Scoop, download the Windows zip from https://github.com/stripe/stripe-cli/releases). On a Mac: `brew install stripe/stripe-cli/stripe`.
+2. Create the sandbox: `stripe sandboxes create --email <your email>`. Put the `secret_key` it prints (it starts with `rkcs_test_`) in `.env.local` as `STRIPE_SECRET_KEY`.
+3. Start webhook forwarding and leave that terminal open: `stripe listen --forward-to 127.0.0.1:3000/api/stripe/webhook`. Put the `whsec_...` it prints in `.env.local` as `STRIPE_WEBHOOK_SECRET`.
+4. Add `INVOICE_TEST_RECIPIENT=billing@juniper-cafe.example.com` to `.env.local`. Stripe test mode never sends invoice emails, so nothing is ever sent to this address; `example.com` is a reserved domain, and it keeps our own addresses off the hosted invoice page shown on screen and in the demo video.
+5. Start (or restart) `pnpm dev`. It reads `.env.local` only when it starts.
+
+### Try the flow without the band
+
+PowerShell:
+
+```powershell
+$draft = Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3000/api/invoices/draft -ContentType 'application/json' -Body (@{ transcript = "Worvo, invoice Juniper Cafe for today's sink repair. Ninety minutes of labor at my usual rate and two shutoff valves at the standard price. Send it to their saved billing email."; source = "typed_text" } | ConvertTo-Json)
+$sent = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:3000/api/invoices/$($draft.data.invoice.id)/send" -ContentType 'application/json' -Body '{"expectedRevision":1}'
+$sent.data.invoice.hostedInvoiceUrl
+```
+
+Mac or Linux:
 
 ```bash
 curl -s -X POST 127.0.0.1:3000/api/invoices/draft -H 'content-type: application/json' -d '{"transcript":"Worvo, invoice Juniper Cafe for today'"'"'s sink repair. Ninety minutes of labor at my usual rate and two shutoff valves at the standard price. Send it to their saved billing email.","source":"typed_text"}'
 curl -s -X POST 127.0.0.1:3000/api/invoices/<id>/send -H 'content-type: application/json' -d '{"expectedRevision":1}'
 ```
 
-Open the `hostedInvoiceUrl` from the second response, pay with card `4242 4242 4242 4242` (any future date, any CVC), and `GET /api/invoices/<id>` shows `"paymentStatus":"paid"`. Test mode does not email the customer.
+Open the `hostedInvoiceUrl`, pay with card `4242 4242 4242 4242` (any future date, any CVC), and within a few seconds `GET /api/invoices/<id>` shows `"paymentStatus":"paid"` (the `stripe listen` terminal shows `invoice.paid`).

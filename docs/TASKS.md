@@ -1,3 +1,5 @@
+> **Post-hackathon plan.** For the hackathon build, [AGENTS.md](../AGENTS.md) is the scope. Do not implement this document today.
+
 # Worvo build tasks
 
 Status: local foundation prepared; T01 remains incomplete until auth, persisted context, and isolation work. Use [PARALLEL_WORK_PLAN.md](PARALLEL_WORK_PLAN.md) for parallel ownership; this list retains product acceptance order.

@@ -30,15 +30,15 @@ Start with one plumber's own Stripe sandbox account. Multi-business onboarding a
 
 | Document | Purpose |
 | --- | --- |
+| [AGENTS.md](AGENTS.md) | Hackathon scope: the one demo path, lanes, and the rules worth keeping |
 | [Three-person execution plan](docs/PARALLEL_WORK_PLAN.md) | Parallel owners, file boundaries, shared contracts, checkpoints, and integration tests |
 | [Implementation plan](docs/IMPLEMENTATION_PLAN.md) | Canonical scope, voice authorization boundary, Stripe flow, and acceptance checks |
 | [Tasks](docs/TASKS.md) | Dependency-ordered build |
 | [Demo](docs/DEMO.md) | Canonical utterance and expected invoice |
 | [Sources](docs/SOURCES.md) | Official references and unverified capabilities |
 | [Agent prompt](docs/AGENT_PROMPT.md) | Implementation kickoff |
-| [AGENTS.md](AGENTS.md) | Repository rules |
 
-Use one TypeScript application with Next.js, pnpm, Zod, Supabase Auth/PostgreSQL, Drizzle, one extraction provider, and Stripe. Provider packages and credentials are added by their lane owner when used; there is no live integration yet.
+For the hackathon: one Next.js/TypeScript app with pnpm, Zod, one extraction model and Stripe test mode. No login or database; see [AGENTS.md](AGENTS.md). The other documents above describe the post-hackathon version.
 
 ## Local foundation
 

@@ -1,3 +1,5 @@
+> **Post-hackathon plan.** For the hackathon build, [AGENTS.md](../AGENTS.md) is the scope. Do not implement this document today.
+
 # Worvo: three-person parallel implementation
 
 This is the execution split for the canonical [implementation plan](IMPLEMENTATION_PLAN.md), not a scope replacement. People A, B, and C can be assigned to teammates without changing the interfaces. Start all three after distributing the common foundation below. Target one solo plumber, one business, USD, synthetic Juniper Cafe, and Stripe sandbox only.

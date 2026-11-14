@@ -1,3 +1,5 @@
+> **Post-hackathon plan.** For the hackathon build, [AGENTS.md](../AGENTS.md) is the scope. Do not implement this document today.
+
 # Worvo implementation plan
 
 **First draft:** a solo plumber creates and sends an invoice by speaking to a wearable.

@@ -99,7 +99,7 @@ Open the `hostedInvoiceUrl`, pay with card `4242 4242 4242 4242` (any future dat
 
 ## Companion screen (lane C)
 
-`src/app/page.tsx` renders `InvoiceScreen`: what the plumber said, the priced invoice, then the QR code and PAID. It has a typed-transcript box as the fallback input and a Send button as the fallback for the double-tap.
+Open `http://127.0.0.1:3000/demo` (`src/app/demo/page.tsx`). It shows what the plumber said, the priced invoice, then the QR code and PAID. It has a typed-transcript box as the fallback input and a Send button as the fallback for the double-tap.
 
 The band code drives the same flow through `useInvoiceFlow()` in `src/components/invoices/useInvoiceFlow.ts`. Render the band component inside `InvoiceScreen` and pass it the `flow` object:
 

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import type { InvoiceView } from "@/shared/contracts";
 import { DEMO_TRANSCRIPT } from "@/fixtures/invoice";
 import { QrCode } from "./QrCode";
+import styles from "./InvoiceScreen.module.css";
 import { useInvoiceFlow, type FlowPhase } from "./useInvoiceFlow";
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
@@ -58,14 +59,14 @@ function HeardPanel({ transcript, phase, onSubmit }: {
   };
 
   return (
-    <section className="panel" aria-labelledby="heard-title">
+    <section className={styles.panel} aria-labelledby="heard-title">
       <h2 id="heard-title">What the plumber said</h2>
       {transcript ? (
-        <blockquote className="transcript">“{transcript}”</blockquote>
+        <blockquote className={styles.transcript}>“{transcript}”</blockquote>
       ) : (
         <>
-          <p className="waiting"><span className="pulse" aria-hidden="true" /> Listening on the band…</p>
-          <form className="typed" onSubmit={submit}>
+          <p className={styles.waiting}><span className={styles.pulse} aria-hidden="true" /> Listening on the band…</p>
+          <form className={styles.typed} onSubmit={submit}>
             <label htmlFor="typed-transcript">Or type it</label>
             <textarea
               id="typed-transcript"
@@ -73,7 +74,7 @@ function HeardPanel({ transcript, phase, onSubmit }: {
               onChange={(event) => setText(event.target.value)}
               rows={5}
             />
-            <button type="submit" className="button secondary" disabled={phase !== "idle"}>
+            <button type="submit" className={`${styles.button} ${styles.secondary}`} disabled={phase !== "idle"}>
               Create invoice
             </button>
           </form>
@@ -85,46 +86,46 @@ function HeardPanel({ transcript, phase, onSubmit }: {
 
 function InvoicePanel({ invoice, phase }: { invoice: InvoiceView | null; phase: FlowPhase }) {
   return (
-    <section className="panel" aria-labelledby="invoice-title">
+    <section className={styles.panel} aria-labelledby="invoice-title">
       <h2 id="invoice-title">Invoice</h2>
       {!invoice ? (
-        <p className="muted">{phase === "drafting" ? "Pricing it from your saved rates…" : "Nothing yet."}</p>
+        <p className={styles.muted}>{phase === "drafting" ? "Pricing it from your saved rates…" : "Nothing yet."}</p>
       ) : (
         <>
-          <p className="bill-to">
-            <span className="muted">Bill to</span>
+          <p className={styles["bill-to"]}>
+            <span className={styles.muted}>Bill to</span>
             <strong>{invoice.customerName ?? "Unknown customer"}</strong>
           </p>
           {invoice.lines.length > 0 && (
-            <table className="lines">
+            <table className={styles.lines}>
               <tbody>
                 {invoice.lines.map((line) => (
                   <tr key={line.description}>
                     <td>
-                      <span className="line-name">{line.description}</span>
-                      <span className="muted">{lineDetail(line)}</span>
+                      <span className={styles["line-name"]}>{line.description}</span>
+                      <span className={styles.muted}>{lineDetail(line)}</span>
                     </td>
-                    <td className="amount">{money(line.amountCents)}</td>
+                    <td className={styles.amount}>{money(line.amountCents)}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr>
                   <td>Total</td>
-                  <td className="amount">{money(invoice.totalCents)}</td>
+                  <td className={styles.amount}>{money(invoice.totalCents)}</td>
                 </tr>
               </tfoot>
             </table>
           )}
           {invoice.unresolved.length > 0 ? (
-            <div className="questions">
+            <div className={styles.questions}>
               <p>Needs an answer before it can be sent:</p>
               <ul>
                 {[...new Set(invoice.unresolved.map(question))].map((text) => <li key={text}>{text}</li>)}
               </ul>
             </div>
           ) : (
-            <p className="caption">Priced from the plumber&apos;s saved rates. The AI never sets a price.</p>
+            <p className={styles.caption}>Priced from the plumber&apos;s saved rates. The AI never sets a price.</p>
           )}
         </>
       )}
@@ -135,32 +136,32 @@ function InvoicePanel({ invoice, phase }: { invoice: InvoiceView | null; phase: 
 function PayPanel({ invoice, phase, onSend }: { invoice: InvoiceView | null; phase: FlowPhase; onSend: () => void }) {
   const ready = invoice !== null && invoice.unresolved.length === 0;
   return (
-    <section className={`panel pay pay-${phase}`} aria-labelledby="pay-title">
+    <section className={`${styles.panel} ${styles.pay} ${phase === "paid" ? styles.payPaid : ""}`} aria-labelledby="pay-title">
       <h2 id="pay-title">Send and get paid</h2>
       {phase === "paid" && invoice ? (
-        <div className="paid">
-          <div className="check" aria-hidden="true">✓</div>
-          <p className="paid-title">Paid</p>
-          <p className="muted">{money(invoice.totalCents)} received through Stripe</p>
+        <div className={styles.paid}>
+          <div className={styles.check} aria-hidden="true">✓</div>
+          <p className={styles["paid-title"]}>Paid</p>
+          <p className={styles.muted}>{money(invoice.totalCents)} received through Stripe</p>
         </div>
       ) : phase === "sent" && invoice?.hostedInvoiceUrl ? (
-        <div className="scan">
+        <div className={styles.scan}>
           <QrCode value={invoice.hostedInvoiceUrl} label={`QR code to pay ${money(invoice.totalCents)}`} />
-          <p className="scan-title">Scan to pay {money(invoice.totalCents)}</p>
-          <p className="waiting"><span className="pulse" aria-hidden="true" /> Waiting for payment…</p>
-          <a className="link" href={invoice.hostedInvoiceUrl} target="_blank" rel="noreferrer">Open the payment page</a>
+          <p className={styles["scan-title"]}>Scan to pay {money(invoice.totalCents)}</p>
+          <p className={styles.waiting}><span className={styles.pulse} aria-hidden="true" /> Waiting for payment…</p>
+          <a className={styles.link} href={invoice.hostedInvoiceUrl} target="_blank" rel="noreferrer">Open the payment page</a>
         </div>
       ) : phase === "sending" ? (
-        <p className="big-prompt">Sending through Stripe…</p>
+        <p className={styles["big-prompt"]}>Sending through Stripe…</p>
       ) : ready ? (
         <>
-          <p className="big-prompt">Double-tap the band to send</p>
-          <button type="button" className="button" onClick={onSend}>Send invoice</button>
+          <p className={styles["big-prompt"]}>Double-tap the band to send</p>
+          <button type="button" className={styles.button} onClick={onSend}>Send invoice</button>
         </>
       ) : invoice ? (
-        <p className="muted">Answer the questions to send it.</p>
+        <p className={styles.muted}>Answer the questions to send it.</p>
       ) : (
-        <p className="muted">The invoice appears here once it&apos;s priced.</p>
+        <p className={styles.muted}>The invoice appears here once it&apos;s priced.</p>
       )}
     </section>
   );
@@ -171,35 +172,37 @@ export function InvoiceScreen() {
   const { phase, invoice, transcript, error } = flow;
 
   return (
-    <main className="screen">
-      <header className="top">
+    <main className={styles.screen}>
+      <div className={styles.inner}>
+      <header className={styles.top}>
         <div>
           <h1>Worvo</h1>
-          <p className="tagline">Say it. Send the invoice.</p>
+          <p className={styles.tagline}>Say it. Send the invoice.</p>
         </div>
-        <ol className="steps" aria-label="Progress">
+        <ol className={styles.steps} aria-label="Progress">
           {steps(phase, invoice).map((step) => (
-            <li key={step.label} className={step.done ? "done" : undefined}>{step.label}</li>
+            <li key={step.label} className={step.done ? styles.done : undefined}>{step.label}</li>
           ))}
         </ol>
       </header>
 
-      {error && <p className="error" role="alert">{error}</p>}
+      {error && <p className={styles.error} role="alert">{error}</p>}
 
-      <div className="grid" aria-live="polite">
+      <div className={styles.grid} aria-live="polite">
         <HeardPanel transcript={transcript} phase={phase} onSubmit={(text) => flow.draftFromTranscript(text)} />
         <InvoicePanel invoice={invoice} phase={phase} />
         <PayPanel invoice={invoice} phase={phase} onSend={flow.send} />
       </div>
 
-      <footer className="bottom">
-        <span className="badge">Stripe test mode</span>
+      <footer className={styles.bottom}>
+        <span className={styles.badge}>Stripe test mode</span>
         {(invoice || error) && (
-          <button type="button" className="button ghost" onClick={flow.reset} disabled={phase === "drafting" || phase === "sending"}>
+          <button type="button" className={`${styles.button} ${styles.ghost}`} onClick={flow.reset} disabled={phase === "drafting" || phase === "sending"}>
             New invoice
           </button>
         )}
       </footer>
+      </div>
     </main>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import styles from "./InvoiceScreen.module.css";
 
 export function QrCode({ value, label }: { value: string; label: string }) {
   const [svg, setSvg] = useState<string | null>(null);
@@ -18,6 +19,6 @@ export function QrCode({ value, label }: { value: string; label: string }) {
 
   // The markup comes from the qrcode library, not from user input.
   return svg
-    ? <div className="qr" role="img" aria-label={label} dangerouslySetInnerHTML={{ __html: svg }} />
-    : <div className="qr qr-empty" aria-hidden="true" />;
+    ? <div className={styles.qr} role="img" aria-label={label} dangerouslySetInnerHTML={{ __html: svg }} />
+    : <div className={styles.qr} aria-hidden="true" />;
 }

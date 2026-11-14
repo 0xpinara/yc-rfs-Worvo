@@ -3,37 +3,7 @@ import { EarlyAccessForm } from "./EarlyAccessForm";
 import { HeroDemo } from "./HeroDemo";
 import { archivo, newsreader } from "./fonts";
 import { WorvoMark } from "./icons";
-import { MeetTally, TallyHero } from "./Tally";
-
-const STEPS = [
-  {
-    title: "Set up once",
-    body: "From your phone or browser, connect Stripe, add your customers, and save your hourly rates and prices.",
-  },
-  {
-    title: "Record what you did",
-    body: "Leaving the job, record who it’s for, how long it took, and what you used. No laptop and no forms.",
-  },
-  {
-    title: "Confirm and get paid",
-    body: "Check the draft and confirm with a tap. Stripe emails the invoice with a payment page, and you’ll see when it’s paid.",
-  },
-];
-
-const PROMISES = [
-  {
-    title: "It asks when something’s unclear",
-    body: "If it can’t tell who the customer is, how long you worked, or what something costs, Worvo holds the draft and asks you one clear question.",
-  },
-  {
-    title: "Your prices, to the cent",
-    body: "The AI only picks out what you said. Every amount comes from your saved rates and prices, worked out exactly.",
-  },
-  {
-    title: "Nothing goes out without you",
-    body: "You approve the exact invoice and who it goes to. Change a line and it needs your OK again.",
-  },
-];
+import { TallyHero, TallySteps } from "./Tally";
 
 export function LandingPage() {
   return (
@@ -70,61 +40,27 @@ export function LandingPage() {
                   <span>Say it.</span>
                   <span>Send the invoice.</span>
                 </h1>
-                <p className={styles.lede}>
-                  Record the job on your wristband. Worvo writes the invoice from your prices, ready to send through
-                  Stripe.
-                </p>
-                <div className={styles.heroForm}>
-                  <EarlyAccessForm />
+                <p className={styles.lede}>Record the job on your wristband. Worvo writes the invoice.</p>
+                <div className={styles.heroCtas}>
+                  <a href="#demo" className={styles.ctaPrimary}>
+                    Try it
+                  </a>
+                  <a href="#access" className={styles.ctaGhost}>
+                    Get early access
+                  </a>
                 </div>
               </div>
               <TallyHero />
             </div>
 
-            <HeroDemo />
-          </div>
-        </section>
-      </div>
-
-      <section id="how" aria-labelledby="how-title" className={styles.how}>
-        <div className={styles.inner}>
-          <h2 id="how-title" className={`${styles.h2} ${styles.howTitle}`}>
-            Set it up once. Then just talk.
-          </h2>
-          <ol className={styles.steps}>
-            {STEPS.map((step, i) => (
-              <li key={step.title} className={styles.step}>
-                <div className={styles.stepHead} aria-hidden="true">
-                  <span className={styles.stepNum}>{i + 1}</span>
-                  <span className={styles.stepRule} />
-                </div>
-                <h3 className={`${styles.h3} ${styles.stepTitle}`}>{step.title}</h3>
-                <p className={`${styles.body} ${styles.stepBody}`}>{step.body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      <MeetTally />
-
-      <div className={styles.trustWrap}>
-        <section aria-labelledby="trust-title" className={styles.trust}>
-          <div className={styles.trustInner}>
-            <h2 id="trust-title" className={`${styles.h2} ${styles.trustTitle}`}>
-              It never guesses about money.
-            </h2>
-            <div className={styles.trustList}>
-              {PROMISES.map((promise) => (
-                <div key={promise.title}>
-                  <h3 className={styles.h3}>{promise.title}</h3>
-                  <p className={`${styles.body} ${styles.trustBody}`}>{promise.body}</p>
-                </div>
-              ))}
+            <div id="demo" className={styles.demoAnchor}>
+              <HeroDemo />
             </div>
           </div>
         </section>
       </div>
+
+      <TallySteps />
 
       <div className={styles.accessWrap}>
         <section id="access" aria-labelledby="access-title" className={`${styles.access} ${styles.onDark}`}>
@@ -133,10 +69,7 @@ export function LandingPage() {
               <h2 id="access-title" className={styles.accessTitle}>
                 Be first to try Worvo.
               </h2>
-              <p className={styles.accessText}>
-                We’re building Worvo now for independent service businesses that already have their own customers.
-                Leave your email and we’ll write when early access opens.
-              </p>
+              <p className={styles.accessText}>For service businesses that invoice by hand.</p>
             </div>
             <div className={styles.formSlot}>
               <EarlyAccessForm />
@@ -151,7 +84,7 @@ export function LandingPage() {
             <WorvoMark size={20} tone="dark" />
             <span>worvo</span>
           </span>
-          <span>Invoices are sent and paid through Stripe.</span>
+          <span>Invoices sent and paid through Stripe.</span>
           <span>© 2026 Worvo</span>
         </div>
       </footer>

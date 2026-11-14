@@ -1,15 +1,9 @@
-# WORVO — Project Plan
+# Worvo plan
 
-**Say it. Get it done.** Detailed customer invoices generated from collected voice data, reviewed, and sent.
+Build the smallest voice-to-invoice assistant for a solo plumber.
 
-The canonical specification is [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md). Start there for the complete product scope, YC alignment, wearable capability boundary, architecture, data model, business rules, API contract, and acceptance criteria.
+The canonical specification is [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md). The founder's revised scope replaces the earlier maintenance-team coordination plan. This draft does not include a technician marketplace, matching, dispatch, stock management, or manager approval.
 
-Use these companion documents to execute it:
+Use [docs/TASKS.md](docs/TASKS.md) for build order, [docs/DEMO.md](docs/DEMO.md) for the invoice scenario, and [docs/SOURCES.md](docs/SOURCES.md) for integration boundaries.
 
-- [AGENTS.md](AGENTS.md): repository instructions for coding agents.
-- [Build tasks](docs/TASKS.md): dependencies, delivery gates, and time budgets.
-- [Agent kickoff prompt](docs/AGENT_PROMPT.md): copyable implementation instruction.
-- [Demo runbook](docs/DEMO.md): canonical scenario, exact numbers, and recovery steps.
-- [Sources and assumptions](docs/SOURCES.md): official references and unverified capabilities.
-
-**Status:** documentation only; application implementation has not started. Keep detailed specifications in the canonical plan so this entry point cannot become a second, conflicting blueprint.
+Status: planning only; implementation has not started.

@@ -1,58 +1,69 @@
-# Worvo — Build Tasks
+# Worvo build tasks
 
-**Status:** implementation not started. Follow the [canonical specification](IMPLEMENTATION_PLAN.md).
+Status: implementation not started. This task list replaces the earlier maintenance-team workflow.
+Canonical specification: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
 
-Check a task only with recorded implementation and verification evidence. Do not report a mock as a live integration.
+For each completed task record: Implemented, Verified (actual command/action and result), Limitations. Unverified provider access stays unchecked.
 
-## T00 — Check hardware and provider access
+## T00: Prove the input and send-authorization boundary
 
-- [ ] Timebox the initial check to 20 minutes. Test wearable account/capture/retrieval, AI/transcription access, database access, and a delivery provider's sandbox/recipient/idempotency constraints.
-- [ ] Record results in [SOURCES.md](SOURCES.md#integration-check-log). Confirm current event rules and deadline. Continue independent work when external access is unresolved.
+- [ ] Dependencies: none.
+- Confirm real band recording/retrieval, source identity, account ownership, timing, and exposed command interfaces.
+- Assume no speaker; check motion/light access only as optional capabilities.
+- Determine whether a fresh authenticated command can bind an exact invoice send. If not, document phone approval fallback and leave A10 incomplete.
+- Check authorized Stripe sandbox, extraction model, and transcription access without printing secrets. No account provisioning or live invoice send.
+- Acceptance: selected input path, actual access, limitations, and per-provider checks recorded in SOURCES.md.
 
-## T01 — Scaffold and freeze contracts
+## T01: Scaffold, identity, and saved business context
 
-- [ ] After T00 is attempted, scaffold the existing TypeScript/Next.js stack with pnpm; validate environment variables and reconcile `.env.example`.
-- [ ] Define capture, proposal, invoice, approval, send-intent, error, and state schemas. Add capture, invoice review, and invoice list navigation.
-- [ ] Acceptance: booting app, shared contracts, and real setup instructions in README.
+- [ ] Dependencies: T00 attempted.
+- Initialize TypeScript/Next.js, pnpm and one lockfile, Zod schemas, server environment validation, database migrations, and authentication.
+- Seed one plumber, synthetic Juniper Cafe, verified test recipient mapping, $120/hour labor, and $22.50/valve.
+- Build minimal setup, pending-review, and invoice-history views.
+- Acceptance: app boots, business isolation works, seed persists after reload, and README has actual commands.
 
-## T02 — Persistence and synthetic seed
+## T02: Deterministic voice-to-draft slice
 
-- [ ] After T01, add Drizzle migrations, Supabase Auth, organization checks, and the plan's minimum tables.
-- [ ] Seed one business/owner, Juniper Cafe, work reference `WORK-104`, and confirmed labor/part prices from [DEMO.md](DEMO.md).
-- [ ] Acceptance: reproducible seed and refresh-safe records; foreign-organization access rejected; reset is local-only.
+- [ ] Dependencies: T01.
+- Use synthetic extraction first. Resolve known customer/prices, calculate cent amounts, persist source/draft revision, show unresolved fields.
+- Bind authorization to the exact revision and authenticated actor. Do not accept historical transcript approval.
+- Implement source deduplication and overlap review before sending.
+- Include invoice identity, service date when known, professional descriptions, units/rates, terms, and recipient. Keep line evidence and attributed corrections internal; never include raw transcripts or private source links in customer output.
+- Acceptance: A01-A03 pass with fixtures; no provider call or customer message needed.
 
-## T03 — Invoice engine and review
+## T03: Stripe sandbox invoicing
 
-- [ ] After T02, implement source/proposal persistence, revisioned corrections, deterministic pricing, detailed line items, exact-version approval, and idempotent confirmation.
-- [ ] Acceptance: fixture produces a $225 invoice; unknown fields block approval; repeats add no lines; editing invalidates approval (A02–A07 as applicable).
+- [ ] Dependencies: T02 and authorized sandbox access.
+- Create/reuse mapped customer, controlled draft, invoice-specific lines, and exact snapshot reconciliation.
+- Finalize and request sending only after authorization; store private hosted invoice/PDF references.
+- Add durable operations, stable per-step idempotency, concurrency protection, and partial-failure reconciliation.
+- Block edits during pending/unknown finalization or send. Reconcile uncertain results before retry; compare Stripe preview/PDF and send contents to the authorized revision. Preserve finalized invoice history.
+- Verify webhook signatures, persist/deduplicate events, and reconcile out-of-order updates and paid status.
+- Acceptance: A04-A07 and A11-A12 pass; sandbox send is labeled simulated and no real email/charge is claimed.
 
-## T04 — AI and real voice
+## T04: Structured extraction and real microphone
 
-- [ ] After T03, add bounded structured extraction, transcription, source-grounded descriptions, clarification, and short readback with button confirmation.
-- [ ] Acceptance: real spoken description becomes the canonical invoice without typing work details; malformed output, microphone denial, and transcript instructions recover safely (A01, A03, A04, A06).
+- [ ] Dependencies: T02; Stripe results depend on T03.
+- Implement one model, preferably Gemini, bounded context, schema/evidence validation, and ambiguity handling.
+- Add browser recording and Deepgram transcription for accessible raw audio; preserve text input fallback.
+- Enforce 60-second/20-MB upload limits and server-side content validation; handle unsupported formats without changing invoice contents.
+- Keep visible proposal review and authenticated confirmation. Optional phone/headphone TTS comes only after the core flow works.
+- Acceptance: canonical/negative extraction fixtures and A08 pass on the actual demo device.
 
-## T05 — Real wearable evidence
+## T05: Real Vexo input and band-only gate
 
-- [ ] After T00 access and T04, implement secure connection, narrow retrieval, source labels, and normalization through the same invoice path.
-- [ ] Acceptance: A10 plus a repeated real-source retrieval check. Leave unchecked if hardware/account access is unavailable.
+- [ ] Dependencies: T00 result, T03, T04.
+- Retrieve a bounded consenting source through the verified interface, preserve identity/timestamps, and normalize to the same draft service.
+- Skip transcription when usable transcript text exists. Distinguish delayed memory from live commands.
+- Integrate fresh command authorization only if proven; otherwise require authenticated phone approval.
+- Acceptance: A09 evidenced; A10 separately proven or explicitly incomplete. Repeated source/command produces one invoice.
 
-## T06 — Invoice output and sending
+## T06: Reliability and rehearsal
 
-- [ ] After T03, generate printable/PDF invoices from the approved snapshot; implement the selected email adapter, confirmed recipient, explicit Send action, stable send intent, and provider receipt.
-- [ ] Add pending, accepted, failed, and unknown result handling; protect against concurrent send clicks and reconcile ambiguous retries.
-- [ ] Acceptance: exact approved content reaches a team-controlled test recipient with authorization; A07–A09 pass. A preview/download alone leaves this task incomplete.
+- [ ] Dependencies: T03-T05; external blocked gates remain disclosed.
+- Run actual build/typecheck/lint and targeted arithmetic, auth, retries/concurrency, provider failures, and webhook checks.
+- Rehearse DEMO.md with sandbox payment and labeled fallbacks. No dispatch/inventory/profit screens.
+- Record which checks were fixtures, microphone, real wearable, and real send. No live email claim from sandbox invoice.sent.
+- Acceptance: no duplicate invoice; source traceable; $225 total; correct payment state; limitations visible.
 
-## T07 — Verify and rehearse
-
-- [ ] After T04/T06, run meaningful pricing, revision, permission, duplicate, and send-recovery checks plus one browser journey. Run the actual build/typecheck/lint scripts.
-- [ ] Check public-demo authentication and disabled reset/identity bypass, or demonstrate locally.
-- [ ] Rehearse [DEMO.md](DEMO.md) three times, prepare a labeled fallback recording, and report voice, wearable, and real-send results separately.
-- [ ] Prepare accurate submission materials. Event submission and real customer messaging require their own authorization; this task only updates and pushes documentation.
-
-## Time budget
-
-Use the deadline linked in [Sources](SOURCES.md#s2-vexohacks-event), subject to organizer changes. Reserve the final 60 minutes for verification and rehearsal. Allocate the preceding time to capability checks (20 min), foundation/seed (50 min), invoice engine (60 min), real voice (60 min), wearable (30 min), and sending/output (45 min). If starting late, seed customer/rates and simplify visual polish; preserve invoice correctness and honest send status.
-
-## Optional ownership when multiple agents are assigned
-
-Backend owner: schemas, persistence, extraction, invoice calculations, approvals, delivery, invariant checks. Frontend owner: capture, invoice review/list, browser recording, and rehearsal. Agree on shared contracts first. Do not automatically spawn agents.
+Public deployment requires authenticated, protected mutations and disabled remote resets. Real customer delivery, charges, account registration, and event submission require authorization for those specific actions.

@@ -1,66 +1,54 @@
-# Worvo — Demo Runbook
+# Worvo demo: a plumber speaks an invoice
 
-**Goal:** collected voice data becomes a detailed invoice that is reviewed and sent.
+Status: specification only. No live integration is claimed.
 
-**Status:** rehearsal specification; integrations remain unimplemented.
+## Setup once
 
-## Canonical synthetic scenario
+One plumber, their Stripe sandbox account, USD, a saved synthetic Juniper Cafe customer, a verified test recipient mapping, $120/hour labor, and shutoff valves at $22.50 each. Use a controlled test recipient, never a guessed real cafe email.
 
-A technician has finished repairing a cafe sink. Use a safe prop and a simulated completed visit. Business/customer details and prices are preconfigured; there is no quoting, dispatch, or scheduling step.
+The demonstration does not include technician signup, job matching, dispatch, inventory, or manager approval. Tax is not assessed in the synthetic fixture; this is not a live tax determination.
 
-| Fixture | Value |
-| --- | --- |
-| Business | Worvo Demo Maintenance; USD; America/Los_Angeles |
-| Customer | Juniper Cafe, synthetic billing details |
-| Work reference | `WORK-104`, cafe sink repair |
-| Labor | 90 minutes at $120/hour |
-| Parts | Two shutoff valves at $22.50 each |
-| Service date | November 14, 2026, explicitly confirmed |
-| Fees/tax | No fees; tax not assessed — demo |
-| Recipient | Team-controlled test email, explicitly configured and confirmed |
-| Payment terms | Synthetic terms explicitly confirmed during setup |
+## Spoken request
 
-## Spoken script and invoice
+> Worvo, invoice Juniper Cafe for today's sink repair. Ninety minutes of labor at my usual rate and two shutoff valves at the standard price. Send it to their saved billing email.
 
-> “Worvo, work one oh four for Juniper Cafe. On this visit, I replaced two shutoff valves and worked for 90 minutes. The leak is fixed.”
+Expected proposal:
 
-Readback: “Prepare an invoice for 90 minutes of labor and two shutoff valves for Juniper Cafe?” Confirm the extracted details, then preview:
+| Line | Calculation | Amount |
+| --- | --- | --- |
+| Sink repair labor | 90 minutes at $120/hour | $180.00 |
+| Shutoff valves | 2 at $22.50 | $45.00 |
+| Fixture total | No assessed demo tax | $225.00 |
 
-| Description | Quantity | Rate | Amount |
-| --- | --- | --- | --- |
-| Labor: replace cafe sink shutoff valves | 1.5 hours | $120.00/hour | $180.00 |
-| Shutoff valves supplied | 2 | $22.50 each | $45.00 |
-| **Subtotal / demo total due** | | | **$225.00** |
+The band has no assumed speaker. Show the proposal and status on the companion phone. Optional speech plays through that phone or headphones. Motion/light control is unverified and not needed for the demo.
 
-Show business/customer identity, invoice number/date, service reference/date, configured terms, and work summary. Internal evidence links each line to the original account; the customer document excludes raw conversations and private source links. The total comes from persisted details and confirmed prices.
+## Demonstration sequence
 
-Approve the exact invoice and recipient, then select **Send invoice**. A real test send uses a team-controlled inbox with authorization. Show the provider acceptance receipt; say “accepted for sending,” not “delivered” unless actual delivery is verified. No payment is collected.
+1. Briefly show saved customer/rates and a connected sandbox, then close the setup screen.
+2. Speak the request through the actual tested capture path. Label real Vexo capture, live microphone, or recorded demo.
+3. Show the extracted proposal and exact evidence. If the fresh band-command authorization gate passed, advance without phone interaction. Otherwise use authenticated phone approval and disclose that fallback.
+4. Show the one Stripe invoice and its hosted test payment page. A test-mode send request is simulated; do not say a real email arrived.
+5. Complete a test payment and show webhook-reconciled paid state. No real money is collected.
 
-## 90-second sequence
+If showing a recording captured earlier, disclose the capture time and retrieval delay. It cannot authorize sending just because it contains the words “send it.”
 
-| Time | Action |
-| --- | --- |
-| 0–15 s | Show the safe repair prop and explain: “Describe the work; Worvo prepares the invoice.” |
-| 15–35 s | Speak the update or retrieve a real earlier wearable recording; show the actual source label |
-| 35–55 s | Show extracted work details, readback, and confirmation |
-| 55–75 s | Show the detailed $225 invoice, evidence, recipient, and approval |
-| 75–90 s | Send the approved invoice to the test inbox; show acceptance status and the customer-facing document |
+## Useful exception
 
-For retrieved memory, say it was recorded earlier and show the timestamp. The stored conversation cannot approve a send. Browser playback does not establish bracelet return audio.
+Say “invoice Juniper Cafe for $45 in parts.” The system should ask whether that is the customer selling amount, rather than infer catalog quantities, costs, or a recipient. Keep the invoice pending until resolved.
 
-## Rehearsal and recovery
+## Rehearsal checks
 
-- [ ] Reset only synthetic records; verify confirmed prices and the authorized test recipient.
-- [ ] Confirm invoice identity, terms, and tax/demo labels before the test send.
-- [ ] Repeat capture confirmation/sync; total remains $225 with two invoice lines.
-- [ ] Edit a line after approval; sending is blocked until the new version is approved.
-- [ ] Test double-click send and an ambiguous timeout; reconcile without blind resend.
-- [ ] Rehearse three times; keep a consented recording with source and delivery-mode labels visible.
+- Repeat capture processing and send requests: still one invoice.
+- Retry after partial Stripe failure: resume the same operation.
+- Change the recipient or lines: old approval is invalid.
+- Compare the preview, Stripe invoice/PDF, recipient, and send payload with the authorized revision. Raw transcripts and private citations stay out of customer output.
+- While a send outcome is unknown, edits and blind resend remain blocked until reconciliation.
+- Replay a historic send instruction: no authorization.
+- Delay/replay webhook events: paid state remains correct.
+- Verify $225.00 subtotal/payable fixture total and expected two lines.
+- Run on the actual band/phone, with recording consent and source labels.
+- Record A09 (real band draft) and A10 (band-only authorized send) separately.
 
-If wearable access fails, use **Live microphone** and disclose the incomplete hardware gate. If inference fails, offer **Recorded demo** fixtures explicitly. If email access is unavailable, show a **Test delivery preview** or download the invoice and disclose that real sending remains incomplete. A fixture must never silently send to a real customer.
+For actual email delivery, arrange a separately authorized live send to a controlled consenting recipient after account, pricing, and tax setup. Sandbox send events are not delivery evidence.
 
-## Submission description
-
-> Worvo turns collected descriptions of physical work into detailed invoices. A worker describes the completed service by voice; Worvo extracts labor, parts, and work details, builds an itemized invoice using confirmed prices, and sends it after the owner reviews and approves it. Invoice details remain traceable to the original work evidence.
-
-Add only actually working integration modes, verified test-send results, links, and known limitations. This documentation update sends no invoice or event submission.
+Recovery: real band unavailable → labeled real phone microphone; no fresh band authorization → authenticated phone approval; provider unavailable → visibly labeled synthetic fixture. These fallbacks do not count as full band-only success.

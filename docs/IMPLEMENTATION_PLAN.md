@@ -1,239 +1,171 @@
-# WORVO — Implementation Plan
+# Worvo implementation plan
 
-**Tagline:** Say it. Get it done.
+**First draft:** a solo plumber creates and sends an invoice by speaking to a wearable.
+**Status:** specification only; application implementation has not started.
 
-**Product:** Detailed invoices generated from collected voice data, reviewed and sent to customers.
+## 1. Product and scope
 
-**Initial customer:** Independent tradespeople and small maintenance businesses.
+The plumber already has customers and does their own work. Worvo removes invoice entry after a visit. It does not recruit, verify, match, route, or dispatch technicians.
 
-**Prototype:** A spoken cafe-repair account becomes an itemized invoice and a confirmed send.
+Target utterance:
 
-**Planning date:** November 14, 2026, America/Los_Angeles.
+> Worvo, invoice Juniper Cafe for today's sink repair. Ninety minutes of labor at my usual rate and two shutoff valves at the standard price. Send it to their saved billing email.
 
-**Implementation status:** Not started. This document specifies intended behavior.
+Initial setup links the plumber's business, Stripe account, customer directory, email recipients, currency, rates, and invoicing/tax policy. That setup may use a phone/browser. Routine invoicing should then require no computer. Exceptions can require phone review; do not disguise that as a fully hands-free success.
 
-## 1. Product thesis and first customer
+P0 includes one plumber, one business, known customers, USD, evidence-backed extraction, deterministic amounts, Stripe invoice creation/sending, and payment status. Exclude dispatch, technician onboarding, quotes, inventory, cost/profit dashboards, scheduling, manager approvals, and expense imports. The broader physical-work coordination vision is future work.
 
-Workers can describe a completed service faster than they can reconstruct it later in an invoice form. Worvo collects that description, extracts the work performed, labor, parts, and relevant details, and prepares a detailed customer invoice. The owner checks the draft and recipient, approves it, and sends it through Worvo.
+## 2. Wearable and authorization gates
 
-The core loop is **voice data → structured work details → detailed invoice → review → send**. A work reference groups evidence for one customer visit; it does not require a service-management workflow.
+Founder-provided hardware description: Vexo Open has a microphone, motion sensor, and colour light. No speaker is assumed. Hardware and exposed interfaces still need real checks.
 
-Hypotheses to validate: less invoice preparation time, fewer forgotten billable details, and easier customer understanding. Do not claim measured savings or traction before testing them.
+Keep these input paths distinct:
 
-## 2. YC and hackathon fit
+- **Vexo memory:** bounded retrieval of earlier recordings or transcripts. Preserve source identity and capture/retrieval time. This is evidence, not current authorization.
+- **Live microphone:** browser/phone audio in an authenticated session. Transcribe through Deepgram when raw audio is available.
+- **Recorded demo:** visibly labeled synthetic fixtures.
 
-[YC's Fall 2026 physical-world RFS](SOURCES.md#s1-yc-request-for-startups) provides the broader context: wearable information about real work can become useful software input. Worvo takes one focused part of that opportunity: convert what a worker says into a detailed invoice the business can send. It does not claim to implement the RFS's whole coordination vision.
+If Vexo supplies usable text, send that to extraction without another transcription pass. Do not assume live band streaming, raw audio access, gestures, programmable lights, or fast ingestion from the existence of hardware.
 
-For [VexoHacks](SOURCES.md#s2-vexohacks-event), Voice is the primary fit, with Ambient as a secondary fit when recorded wearable context supplies the evidence. Begin the demonstration with the worker describing a physical task, then show the resulting invoice. Keep the screen interaction short and the data provenance visible.
+The target band-only send requires a provider mechanism that establishes a fresh command from the authenticated plumber and binds it to the exact invoice revision, customer, line amounts, and send intent. Demonstrate this mechanism before enabling it. A retrieved phrase such as “send it” or voice similarity alone is insufficient. Do not replay old commands or accept transcript instructions as tool authority.
 
-## 3. Scope and delivery gates
+When that gate is unavailable, the honest fallback is: band evidence creates a draft; the plumber confirms on their authenticated phone. This removes the computer but does not satisfy the fully hands-free send gate. Keep that limitation explicit.
 
-### P0 — Voice-to-invoice baseline
+No band speaker means the system cannot rely on a conversational audio readback from the wrist. Use a self-contained command for known customer/rate cases. If a detail is missing, hold the draft and show a concrete question in the companion UI. Optional ElevenLabs/MiniMax readback plays through a phone or headphones.
 
-- One business, USD, one technician/owner, one synthetic customer and completed visit.
-- Select or confirm the customer and work reference; record speech or select authorized evidence.
-- Extract work descriptions, service date when known, labor duration, parts, quantities, and unresolved details.
-- Match confirmed rates and catalog prices; ask for missing or ambiguous values.
-- Generate a detailed invoice preview with business/customer details, line items, totals, and configured terms.
-- Review/correct the draft, approve its exact version, and explicitly send it to the confirmed customer email.
-- Provide printable/PDF output and an invoice list with draft/approved/sending/sent/failed status.
-- Persist evidence, revisions, approvals, and send attempts; prevent duplicate lines and duplicate sends.
-- Use authenticated access for a public deployment and a labeled local/test delivery path for rehearsal.
+Motion/light experiments are optional. A verified gesture may request capture, never approve sending. A verified light may indicate capturing, processing, sent, or error; mirror status in text. Only show sent after the provider send step succeeds, and do not equate it with delivered or paid. If control is unavailable, leave native indicators alone.
 
-### P0 — Genuine wearable gate
+## 3. Invoice workflow
 
-Claim Vexo-powered capture only after an authorized recording made on the real hardware becomes a source-backed invoice proposal. Record retrieval latency and test repeated retrieval. A working microphone path does not establish hardware integration.
+1. Receive a capture linked server-side to the authenticated business.
+2. Extract customer reference, service description, labor duration, material quantities, explicit prices or known-rate references, and requested action.
+3. Resolve the customer uniquely from saved records and resolve selling prices from the business's catalog. “Usual rate” is valid only when a configured snapshot exists. Never infer an email, amount, or tax exemption.
+4. Calculate the invoice in integer cents. Display the source excerpt and proposed line items in the companion UI.
+5. Persist a versioned draft. Unknown customer, ambiguous amount, missing price, unclear labor basis, duplicate work, or unresolved tax configuration leaves it pending clarification.
+6. Obtain authorization for that exact draft through the proven fresh-command mechanism or authenticated phone action. Editing a draft invalidates prior authorization.
+7. Create and populate a Stripe draft, finalize it, and request sending through Stripe Invoicing.
+8. Store the hosted invoice/PDF references privately and track sending and payment through Stripe events.
 
-### Deferred
+The model only proposes fields. Server code owns customer resolution, rates, arithmetic, authorization, and Stripe actions. The source text cannot select a business, change credentials, invoke tools, or approve itself.
 
-Quote generation, technician assignment, scheduling, job lifecycle management, stock deductions, workforce analytics, margin dashboards, robots, payment collection, and broad accounting integrations. Delivery of the approved invoice is the one external messaging action in P0.
+### Detailed invoice and evidence
 
-If time is short, seed the business/customer and rate catalog. Preserve voice extraction, itemization, review, and sending. A download or mock send is a disclosed fallback and does not satisfy the real-send gate.
+Each customer-facing invoice includes the business and customer billing identities, invoice number/date, service date when known, visit reference, professional work description, itemized labor/parts, quantities/units, rate and line amount, subtotal, configured fees/tax, total due, and configured due date/terms. Keep an unresolved required field visibly pending rather than inventing it. A visit reference only groups evidence; it does not introduce a job-management lifecycle.
 
-## 4. Wearable feasibility and source adapters
+Link every extracted line to its capture/proposal, or record explicit user-entry attribution. Keep the original source and attributed corrections in the authenticated review view. Raw transcripts, private citation URLs, unrelated conversations, and internal costs must not appear in the customer invoice. Reconcile the Stripe-rendered invoice/PDF and send payload against the authorized version; use Stripe's document and delivery flow rather than building a second PDF renderer or email adapter.
 
-Use the verified public interface in [S3](SOURCES.md#s3-vexo-developer-documentation). Check hardware/account access early, then build the business flow independently. Do not assume live bracelet audio streaming or a bracelet response channel.
+### Revisions and uncertain sends
 
-Normalize Vexo memory, browser recordings, and synthetic fixtures to a server-owned capture with: ID, organization, work reference, source type, provider account key, external source ID, captured time if available, retrieval time, transcript, content hash, and optional citation URL.
+Draft corrections create attributed revisions and invalidate approval. The phone fallback explicitly approves the exact version and recipient before requesting send; the proven band-only path may authorize both through its bound command. Lock edits while finalization or sending is pending or its outcome is unknown. Show “Send status unknown” on ambiguous timeouts and reconcile with Stripe before retrying. A confirmed failure permits a retry of the same authorized payload or a correction followed by new authorization.
 
-Retrieve only the consenting account's relevant work context. Keep OAuth/token exchange and encrypted credentials server-side; use the documented flow with state, issuer, and callback checks. Respect revocation, label unavailable sources, and provide removal of locally retained excerpts. Deletion at the source does not automatically erase Worvo's copy.
+Once finalized, preserve the original invoice and its evidence. Do not silently edit financial history after sending. Replacement/void/credit workflows require explicit later implementation; they are outside this first draft.
 
-Browser recording is user-initiated, capped at 60 seconds and 20 MB, and transcribed server-side. Handle permission denial, silence, unsupported format, and provider failure. Use a short spoken readback through a tested browser playback path, plus text and buttons.
+## 4. Stripe Invoicing is the core integration
 
-Show **Vexo memory**, **Live microphone**, or **Recorded demo**, with captured/retrieved times separately. Pending ingestion remains a visible pending state. Historical speech supplies evidence; it cannot authorize invoice sending.
+Use Stripe Invoicing for a customer-specific bill with line items, payment terms, a PDF, and a hosted payment page. A generic reusable Payment Link is not the primary invoice record. See [official references](SOURCES.md#stripe).
 
-## 5. Architecture and implementation layout
+For the first prototype, use one plumber's own Stripe sandbox account and one business. No platform marketplace or split payments are needed. If Worvo later supports independent businesses connecting their own accounts, design Stripe Connect onboarding and account isolation at that point. Connect is also relevant to SaaS platforms, not just marketplaces; never route unrelated businesses through one plumber's account.
 
-Keep a modular monolith and the existing stack. Use pnpm and commit the lockfile. Verify interfaces against [S4](SOURCES.md#s4-implementation-references) and the installed versions.
+### Server-side sequence
 
-| Layer | Choice | Responsibility |
-| --- | --- | --- |
-| App/API | Next.js, React, TypeScript | Capture, invoice preview/list, validated handlers |
-| UI | Tailwind, shadcn/ui, Lucide | Clear mobile controls and readable invoice values |
-| Persistence | Supabase PostgreSQL with Drizzle | Versioned invoices, evidence, approvals, send attempts |
-| Identity | Supabase Auth | Server sessions and organization membership |
-| Contracts | Zod | Request and extraction validation |
-| AI | Vercel AI SDK, one OpenAI model initially | Evidence-grounded work-detail extraction |
-| Speech | Browser capture, ElevenLabs transcription if accessible | Voice input and short readback |
-| Wearable | Server Vexo adapter | Permissioned recorded evidence |
-| Invoice output | Server-generated printable/PDF representation | Exact approved line items and totals |
-| Sending | One server-side invoice-email adapter | Approved PDF or access-controlled invoice link, send receipt |
-| Verification | Vitest and Playwright | Pricing, revisions, duplicate handling, end-to-end journey |
+- Find or create the Stripe Customer from the saved, verified local customer. Persist the mapping and prevent concurrent duplicate creation.
+- Create a draft with collection_method=send_invoice, explicit currency/payment terms, automatic advancement disabled, and local operation metadata. Do not automatically charge a stored payment method.
+- Add each validated line to this specific invoice. Do not leave unrelated pending customer items eligible for accidental inclusion.
+- Reconcile the Stripe draft's lines, recipient, subtotal, discounts/credits, tax configuration, and payable total against the authorized snapshot. Unexpected adjustments block sending.
+- Explicitly finalize after authorization, obtain the hosted_invoice_url and invoice_pdf, then call the send endpoint. Do not assume finalization alone emailed the customer.
+- Record send success and signed webhook events separately from actual email delivery and payment. A timeout is an unknown result to reconcile before retry, not permission to create a new invoice.
 
-Select one working delivery provider during setup; verify its sandbox, recipient restrictions, idempotency, and status semantics. Do not add several providers or claim email delivery before it is exercised.
+Use a server-side restricted key with the required permissions and a separate webhook signing secret. Pin the supported API/SDK version at implementation. No keys or private invoice links in client logs or Git.
 
-```text
-src/app/                         # Capture, invoice list, invoice detail, API
-src/components/{voice,invoices,evidence,ui}/
-src/lib/schemas/                 # Shared request/extraction contracts
-src/lib/auth/                    # Server sessions and membership
-src/lib/db/                      # Schema and repositories
-src/lib/services/                # Capture, extraction, invoice, approval, sending
-src/lib/integrations/{vexo,speech,email}/
-src/lib/fixtures/                # Synthetic audio/transcripts and expected invoices
-drizzle/                         # One migration history
-tests/{unit,integration,e2e}/
-```
+### Payment events
 
-Use a transaction-capable PostgreSQL driver for mutations. A local fixture adapter can support rehearsal but cannot prove database concurrency or real sending. Reuse the deterministic invoice calculations in both modes.
+Verify the Stripe-Signature against the raw payload. Persist/deduplicate event IDs durably before acknowledging receipt, and process recoverably. Events may arrive out of order; retrieve/reconcile current Stripe state rather than regressing paid to open after a delayed event.
 
-## 6. Minimum data model
+Track invoice.sent, invoice.finalization_failed, invoice.payment_failed, and invoice.paid. The paid event can include an invoice marked paid outside Stripe: distinguish settled invoice status from funds collected through Stripe. Never infer payment from finalization, an email event, or a return page.
 
-Use UUIDs, timestamps, organization-scoped queries/foreign keys, and integer cents. A work reference is just an evidence grouping for a customer visit.
+### Sandbox and live behavior
 
-| Table | Essential data |
-| --- | --- |
-| `organizations` | Business identity/address, currency, time zone, configured tax policy and invoice terms |
-| `memberships` | Organization, authenticated user, invoice approval/send permission |
-| `customers` | Organization, customer identity/address, verified recipient email |
-| `work_sessions` | Organization, customer, human-readable reference, service date if known |
-| `catalog_items` | Labor/part descriptions, units, confirmed selling rates/prices, version |
-| `work_captures` | Work session, source/account/ID, transcript, content hash, provenance; unique source identity per session |
-| `work_proposals` | Capture, extracted details, unresolved questions, revision, confirmation status |
-| `invoices` | Work session, invoice number, customer/business snapshots, date/terms/tax snapshot, status, version, totals, approver |
-| `invoice_lines` | Description, quantity/unit, rate, amount, capture/proposal references or explicit manual-entry attribution |
-| `delivery_attempts` | Invoice/version, confirmed recipient, stable send key, provider ID, pending/accepted/failed/unknown result |
-| `audit_logs` | Actor, revision, operation, request ID, relevant changes; avoid raw transcript copies |
-| `idempotency_requests` | Scoped operation/key, request hash, stored response |
-| `vexo_connections` | Owning member, provider account, encrypted credentials, expiry/state; server-only |
+Stripe's send API documents that test-mode calls do not send real email even though invoice.sent can occur. Demonstrate a test invoice and hosted test payment page, labeled as simulated sending. Actual email delivery requires a separately authorized live check and real account readiness; do not claim sandbox email delivery.
 
-P0 has one invoice per work session, revised in place before approval. Accepted delivery freezes that invoice version. Later financial corrections require an explicit replacement/credit workflow, deferred from P0. Keep original evidence and revision attribution.
+The canonical fixture is USD and tax not assessed for demonstration. Before live invoicing, configure the business's actual tax policy and required customer fields. Do not enable automatic tax without the necessary registrations/configuration, and never assume missing tax information means zero tax.
 
-## 7. Invoice content, calculations, and sending
+## 5. Architecture and minimal persistence
 
-### Detailed invoice
+One Next.js/TypeScript app, pnpm, Zod, Supabase Auth/PostgreSQL with Drizzle, Vercel AI SDK with one selected model, and Stripe. Verify compatible versions during scaffolding. Keep provider operations in small server functions; no multi-agent runtime or general provider router.
 
-Include the business identity, confirmed customer/billing recipient, invoice number/date, service date or visit reference, plain-language work summary, and itemized services/labor/parts. Each line shows description, quantity, unit, confirmed rate, and line total. Show subtotal, configured fees/tax, total due, due date, and payment instructions when provided. Missing required details remain visibly unresolved.
+Minimum records:
 
-Keep evidence in the authenticated review view. Customer-facing output includes the professional work description, not raw conversations, private source links, internal costs, or unrelated recordings.
+- Business/member: authenticated owner, currency, invoicing policy, Stripe account mapping.
+- Customers: saved recipient, verified email, business scope, Stripe customer mapping.
+- Catalog/rates: labor selling rate and material selling prices, with snapshots on invoices.
+- Captures: business, stable source identity, content hash, transcript, source and retrieval times.
+- Invoice drafts: source, revision, customer, line snapshots, computed amounts, unresolved fields, authorization record.
+- Invoice operations: per-step idempotency keys, request hashes, Stripe IDs, progress, result/error.
+- Webhook events/audit: durable provider event IDs and attributable state changes.
 
-### Deterministic pricing
+Scope every query and mutation to the authenticated business. Enforce foreign-key ownership and expected revisions. Do not trust business/actor IDs from the model or client. Protect cookie-session mutations against cross-site requests.
 
-- Money uses integer cents. AI cannot supply authoritative totals.
-- Labor amount = `roundHalfUp(minutes * confirmedHourlyRateCents / 60)` using integer/rational arithmetic. Round once per labor line; sum rounded lines.
-- Parts amount = confirmed quantity × confirmed unit selling price. P0 part quantities are positive integers.
-- Subtotal = sum of line amounts; total = subtotal + explicitly configured fees/tax.
-- Snapshot approved prices. Never invent missing rates, quantities, tax rules, recipients, or terms.
-- “$45 in parts” is ambiguous about cost versus customer price; ask instead of assuming.
-- Clarify whether labor is incremental or cumulative before adding another report.
-- The synthetic fixture uses **tax not assessed — demo** and no fees; its total equals subtotal. This makes no claim about real tax treatment. Real sending requires configured or explicitly confirmed billing/tax details.
-- Sending does not establish payment or cash collection. Cost/profit analytics are outside P0.
+Browser audio uploads are user-initiated, at most 60 seconds and 20 MB, with server-side type/content validation. Permission denial, silence, unsupported formats, or transcription failure leaves the draft unchanged. Retrieve only the consenting account's selected work context, encrypt connection credentials server-side, and support disconnect/revocation and removal of locally retained excerpts. Source deletion does not automatically remove Worvo's retained copy.
 
-### Approval and send states
-
-```text
-draft -> needs_review -> approved -> sending -> sent
-                                         -> send_failed
-```
-
-An unresolved draft cannot be approved. Approval records the authenticated actor and exact invoice version, including the customer-facing document, totals, and recipient. Any edit invalidates approval and returns to review. Lock invoice edits while a send is pending or its outcome is unknown; reconcile that attempt first. After a definitive failure, allow an explicit retry of the approved payload or a correction followed by new approval.
-
-**Approve** and **Send invoice** are separate actions. The send action is an authenticated request for that approved version and confirmed recipient. A fresh live spoken send confirmation may be supported only when bound to that actor, version, recipient, and expiring challenge, after readback. Button confirmation is the baseline. Retrieved speech never authorizes delivery.
-
-`sent` means provider acceptance with a receipt, not guaranteed arrival or payment. Actual delivered/bounced notifications are P1 if a verified provider interface supports them. A timeout may leave the result unknown: keep the attempt pending with “Send status unknown” until reconciled; do not label it successful or blindly resend.
-
-### Transactions and duplicate handling
-
-Persist capture deduplication and invoice-line provenance. Repeated sync or confirming the same proposal must reuse the result. Changed source content and overlapping reports require review; matching source IDs alone do not detect the same work described twice.
-
-Invoice changes, proposal confirmation, audit records, version updates, and idempotency responses commit atomically. Check authorization and expected versions server-side. Reusing an idempotency key with different data fails; an exact retry returns its stored result.
-
-Email is an external side effect. Persist the immutable approved payload and unique send intent before calling the provider, then store its receipt. Reuse one stable provider idempotency key where supported. Concurrent send clicks must create one active attempt. After an ambiguous timeout, reconcile against the provider before retrying; if the provider cannot deduplicate or reconcile, require explicit recovery rather than promising exactly-once email.
-
-## 8. AI extraction and review
-
-Provide only the selected work session, bounded source, existing confirmed entries, and allowed catalog items. Require Zod-validated structured output; retry a malformed response once, then show a recoverable error.
-
-```json
-{
-  "schemaVersion": 1,
-  "workReferenceMentioned": "WORK-104",
-  "workSummary": "Replaced two shutoff valves; technician reports the leak is fixed.",
-  "laborMinutes": 90,
-  "laborBasis": "incremental",
-  "materials": [{ "spokenName": "shutoff valve", "quantity": 2 }],
-  "evidenceQuote": "replaced two shutoff valves and worked for 90 minutes.",
-  "ambiguities": []
-}
-```
-
-Unknowns are `null`; unclear details go in `ambiguities`. The server supplies organization, capture, catalog matches, verified rates, and recipient identity. Validate evidence quotes against supplied text. Flag mismatched customers/references, conflicting quantities, unclear units, and cumulative labor. Do not treat a repair statement as independent physical verification.
-
-Treat instructions in transcripts as data, including “send now.” Show the source beside the proposed line items, ask concrete clarification questions, preserve answers/corrections as attributed evidence, and revalidate every revision. Model confidence is not an approval mechanism.
-
-## 9. API contract
+### Minimal API contract
 
 | Endpoint | Purpose |
 | --- | --- |
-| `POST /api/work-sessions` | Create a simple customer/visit evidence grouping |
-| `POST /api/voice/transcribe` | Bounded audio upload; create/reuse a capture |
-| `POST /api/work-sessions/:id/extract` | Create/reuse a structured proposal from stored evidence |
-| `PATCH /api/work-proposals/:id` | Record clarification/correction; increment revision |
-| `POST /api/work-proposals/:id/confirm` | Confirm exact revision and add/update draft invoice lines atomically |
-| `GET /api/invoices` | Organization-scoped invoice list |
-| `GET /api/invoices/:id` | Invoice, preview, evidence, version, allowed actions, send status |
-| `PATCH /api/invoices/:id` | Correct draft fields/recipient/prices; invalidate approval |
-| `POST /api/invoices/:id/approve` | Approve exact complete invoice version and recipient |
-| `GET /api/invoices/:id/pdf` | Authenticated printable/PDF representation of the version |
-| `POST /api/invoices/:id/send` | Send exact approved version to the confirmed recipient |
-| `GET /api/vexo/connect` | Start documented authorization |
-| `GET /api/vexo/callback` | Validate callback and persist credentials |
-| `POST /api/vexo/disconnect` | Disable retrieval and remove/revoke credentials |
-| `POST /api/vexo/sync` | Bounded retrieval for the selected work session |
+| POST /api/captures/transcribe | Authenticated bounded upload; create/reuse an attributable capture |
+| POST /api/invoices/draft | Extract a stored capture into a versioned invoice proposal |
+| GET /api/invoices and GET /api/invoices/:id | Business-scoped history, preview, evidence, and current operation status |
+| PATCH /api/invoices/:id | Attributed correction; invalidate prior authorization |
+| POST /api/invoices/:id/authorize | Bind authenticated approval or a verified fresh command to the exact revision/recipient |
+| POST /api/invoices/:id/send | Resume/create the authorized Stripe invoice operation; no client-supplied authoritative totals |
+| POST /api/stripe/webhook | Verify raw-body signatures; persist and reconcile provider events |
+| GET /api/vexo/connect and GET /api/vexo/callback | Start and validate the verified provider connection flow |
+| POST /api/vexo/disconnect and POST /api/vexo/sync | Revoke/disable connection or retrieve bounded evidence |
 
-All mutations require server authorization, validation, an idempotency key, and the relevant expected version. Scope lookups to the session's organization, not client/model claims. Use same-origin/CSRF protections for cookie sessions. Use stable errors for unresolved fields, stale versions, duplicate source, and unknown delivery result. A failed extraction or delivery call must not silently change approved invoice contents.
+Mutations require scoped idempotency keys and relevant expected revisions. Return explicit unresolved-field, stale-version, unauthorized, and unknown-send outcomes. Stripe calls occur only after the corresponding server-side authorization and validation.
 
-## 10. Experience and presentation
+Money is integer cents. Round each labor line half-up once: minutes × hourlyRateCents / 60. Sum line amounts. Quantities and minutes are positive integers for this draft. Unknown prices block sending. The demo's 90 minutes at $120/hour plus two valves at $22.50 each gives $225.00 before any real tax determination.
 
-Three small views: **Capture work**, **Invoice review**, and **Invoices**. Capture has the work/customer reference, source badge, large recording control, transcript, and readback. Review has editable itemization, unresolved questions, internal evidence, printable preview, confirmed recipient, Approve, and Send invoice. The list shows status and totals.
+Database and Stripe cannot share one transaction. Persist an operation before calling Stripe, use stable per-operation/per-step idempotency keys, and resume/reconcile after partial failure. Do not hold a database lock through a provider call. Prevent two workers from advancing the same draft concurrently. A retry must reuse the existing invoice; a changed request cannot reuse an old authorization.
 
-Use the existing restrained industrial style, large touch targets, accessible status text, and aligned financial numbers. Prioritize permission, ambiguity, pending-ingestion, stale-approval, failed-send, and unknown-send states. The worker should not type the work details on the happy path.
+Deduplicate source retrieval and detect overlapping reports of the same visit. Changed source content requires a new review revision; a different recording does not automatically mean a new billable visit.
 
-## 11. Verification and measurable success
+## 6. Sponsor roles
 
-| ID | Acceptance check |
+| Provider | Role | Decision |
+| --- | --- | --- |
+| Stripe | Customer invoice, email send request, hosted payment page, PDF, payment lifecycle | Core P0 integration in sandbox |
+| Google DeepMind / Gemini | Structured invoice-field extraction | Preferred model; validate evidence and meaning server-side |
+| OpenAI | Same extraction role | Setup alternative to Gemini; implement one |
+| Deepgram | Speech-to-text when raw audio is accessible | Use for the real microphone path; skip when Vexo supplies text |
+| ElevenLabs | Optional phone/headphone readback | After core flow; disabled by default |
+| MiniMax | Alternative optional TTS | Do not add a second voice provider |
+| Brex | Potential expense reconciliation | Deferred; not needed to create/send an invoice |
+
+The sponsor list comes from the user. Credits, event sponsorship, accounts, APIs, and hardware access are not proven by this plan. Record actual selected model/voice IDs and measured results. Keep bounded transcripts private, send only necessary customer/catalog context, and never claim calibrated accuracy from model confidence.
+
+## 7. Screens and acceptance checks
+
+Build a small companion setup/review screen and invoice history with source, lines, pending questions, send state, hosted invoice access, and payment state. These support setup and exceptions; do not make a dashboard the main workflow. Keep keyboard access, visible status, and actionable errors.
+
+| ID | Acceptance |
 | --- | --- |
-| A01 | Real microphone speech creates the expected work proposal and draft invoice after confirmation |
-| A02 | Canonical labor is $180.00, parts $45.00, invoice $225.00; rounding and unknown-price cases behave correctly |
-| A03 | Every extracted line has evidence; corrections retain attribution; raw transcripts stay out of customer output |
-| A04 | Missing quantities/rates/recipient or ambiguous cumulative reports block approval |
-| A05 | Repeated retrieval, concurrent confirmation, and refresh cannot duplicate lines |
-| A06 | Unauthorized/cross-organization access, transcript instructions, stale approval, and replayed send confirmation fail |
-| A07 | Editing invalidates approval; the PDF and send payload match the exact approved version |
-| A08 | A real authorized test send returns a provider receipt to a team-controlled recipient; repeated send clicks do not create a second active attempt |
-| A09 | Timeout/unknown result remains visible and is reconciled without blind resend; provider rejection is recoverable |
-| A10 | Real wearable evidence creates an attributable invoice proposal and repeated retrieval remains harmless |
+| A01 | Known-customer utterance yields 90 minutes, two valves, and a $225.00 draft from saved prices |
+| A02 | Wrong/ambiguous customer, unknown price, unclear labor, ambiguous “$45 in parts,” or missing tax setup blocks send |
+| A03 | Unauthorized actor, foreign business, stale revision, historical “send,” and transcript injection cannot authorize an invoice |
+| A04 | Stripe draft has only the expected customer/lines/total; retry and concurrent processing create one invoice |
+| A05 | Failure after customer creation, line creation, finalization, or send resumes safely without duplicate billing or automatic charging |
+| A06 | Finalized/send-requested/simulated email/paid are distinct; webhook signatures, replay, and ordering checks pass |
+| A07 | A sandbox hosted invoice accepts a test payment and reconciles to paid without implying real funds or delivered email |
+| A08 | Real microphone path works; permission denial, silence, provider failure, and missing details recover |
+| A09 | A real band recording reaches an attributable invoice draft; source timing and provenance are shown |
+| A10 | A fresh band command can authorize the exact invoice send with no phone/computer interaction; prove the mechanism or leave this gate incomplete |
+| A11 | Invoice preview, Stripe lines/PDF, recipient, and send payload match the authorized revision; customer output excludes private evidence |
+| A12 | Pending/unknown sends block edits and blind retries; draft correction invalidates authorization; finalized invoices retain their original history |
 
-A01–A09 establish the voice-and-send baseline; A10 additionally establishes wearable integration. A mock email preview is not A08. Use the [demo fixture](DEMO.md), meaningful service/database checks, one end-to-end browser journey, and a real microphone/sending smoke check.
+Fixture checks alone do not establish A08-A10. Phone confirmation is a valid no-computer fallback but not a band-only send success.
 
-Measure capture-to-draft time, fields corrected, invoice preparation time, and send outcome. Aim for a short microphone readback within 10 seconds, measure actual venue performance, and track wearable ingestion delay separately. No assumed real-time ingestion SLA.
+## 8. Build order
 
-## 12. Build sequence and delivery
+Follow [TASKS.md](TASKS.md): capability check → app/auth/customers/rates → fixture extraction and draft → sandbox Stripe flow → microphone → real wearable → reliability and demo.
 
-Follow [TASKS.md](TASKS.md): capability check → foundation/seed → deterministic invoice and review → AI and real voice → real wearable → PDF/sending → verification and rehearsal. Check delivery provider access at the start, alongside wearable access, so sending is not discovered to be unavailable at the end.
-
-Freeze features at least 60 minutes before the organizer-confirmed deadline. Preserve a labeled fixture and test-delivery fallback; report the real microphone, wearable, and sending gates independently. This documentation task changes the plan and pushes it to GitHub; it sends no customer invoice.
-
-## 13. After the hackathon
-
-Validate with three to five tradespeople or small maintenance businesses. Measure time from spoken account to a sendable invoice, correction rate, missing billable details, and customer readability. Expand into recurring invoicing and existing accounting workflows if users need them. Determine willingness to pay through interviews. The product direction remains voice-derived invoicing; broader service management is not a prerequisite.
+Use [DEMO.md](DEMO.md) for the shared scenario. Do not provision accounts, send live customer invoices, charge money, deploy publicly, or submit to an event merely because this plan describes those future actions. This scope update authorizes planning changes, not live financial operations.

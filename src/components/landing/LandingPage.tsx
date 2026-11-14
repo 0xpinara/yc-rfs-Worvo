@@ -11,8 +11,8 @@ const STEPS = [
     body: "From your phone or browser, connect Stripe, add your customers, and save your hourly rates and prices.",
   },
   {
-    title: "Say what you did",
-    body: "Leaving the job, tell your band who it’s for, how long it took, and which parts you used. No laptop and no forms.",
+    title: "Record what you did",
+    body: "Leaving the job, record who it’s for, how long it took, and what you used. No laptop and no forms.",
   },
   {
     title: "Confirm and get paid",
@@ -71,9 +71,8 @@ export function LandingPage() {
                   <span>Send the invoice.</span>
                 </h1>
                 <p className={styles.lede}>
-                  For service businesses that still do invoices by hand, from plumbers and electricians to cleaners,
-                  mechanics and landscapers. Tell your wristband what you did on the job, and Worvo writes the invoice
-                  from your own prices, ready to send through Stripe.
+                  Record the job on your wristband. Worvo writes the invoice from your prices, ready to send through
+                  Stripe.
                 </p>
                 <div className={styles.heroForm}>
                   <EarlyAccessForm />

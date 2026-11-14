@@ -43,7 +43,7 @@ const NOTES: Record<Phase, string> = {
   listening: "Listening…",
   drafting: "Matching the customer and your saved prices…",
   held: "One question before this can go out.",
-  ready: "Draft ready. Nothing sends until you confirm.",
+  ready: "Draft ready. Nothing sends until you double-tap your band.",
   sending: "Sending through Stripe…",
   sent: "Sent. Juniper Cafe gets the invoice with a payment page.",
   paid: "Paid. Juniper Cafe paid on the Stripe payment page.",
@@ -157,11 +157,11 @@ export function HeroDemo() {
   const chip = CHIPS[phase];
 
   let confirmNote = "Unlocks when the draft is complete.";
-  if (canSend) confirmNote = "You’ll confirm with one tap on your phone.";
+  if (canSend) confirmNote = "On the job, you double-tap your band. Here, click to try it.";
   else if (phase === "held") confirmNote = "Answer the question first.";
 
   const track = [
-    { state: "done", label: "Confirmed by you", sub: "This exact invoice and recipient" },
+    { state: "done", label: "Double-tapped by you", sub: "This exact invoice and recipient" },
     {
       state: sentNow ? "done" : "now",
       label: sentNow ? "Sent through Stripe" : "Sending through Stripe",
@@ -330,7 +330,7 @@ export function HeroDemo() {
           ) : (
             <div className={styles.confirm}>
               <button type="button" className={styles.confirmBtn} disabled={!canSend} onClick={confirm}>
-                Confirm and send
+                Double-tap to send
               </button>
               <span className={styles.confirmNote}>{confirmNote}</span>
             </div>

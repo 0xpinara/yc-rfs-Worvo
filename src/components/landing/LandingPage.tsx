@@ -15,8 +15,8 @@ const STEPS = [
     body: "Leaving the job, record who it’s for, how long it took, and what you used. No laptop and no forms.",
   },
   {
-    title: "Confirm and get paid",
-    body: "Check the draft and confirm with a tap. Stripe emails the invoice with a payment page, and you’ll see when it’s paid.",
+    title: "Double-tap and get paid",
+    body: "Hear the customer and total read back, then double-tap your band to send. Stripe emails the invoice with a payment page, and you’ll see when it’s paid.",
   },
 ];
 
@@ -31,7 +31,7 @@ const PROMISES = [
   },
   {
     title: "Nothing goes out without you",
-    body: "You approve the exact invoice and who it goes to. Change a line and it needs your OK again.",
+    body: "Worvo reads back who it’s for and the total. Nothing sends until you double-tap your band.",
   },
 ];
 

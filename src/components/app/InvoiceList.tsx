@@ -165,7 +165,7 @@ export function InvoiceList() {
         <div className={styles.emptyState}>
           <Image src={TALLY_POSES.listening.src} alt="" className={styles.emptyTally} unoptimized />
           <p className={styles.emptyTitle}>No invoices here yet.</p>
-          <Link href="/app" className={`${styles.primaryLink} ${fx.fx}`}>
+          <Link href="/capture" className={`${styles.primaryLink} ${fx.fx}`}>
             Record a job
           </Link>
         </div>

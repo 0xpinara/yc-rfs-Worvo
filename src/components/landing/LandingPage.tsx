@@ -30,7 +30,7 @@ export function LandingPage() {
                 <a href="#how" className={styles.navLink}>
                   How it works
                 </a>
-                <Link href="/app" className={styles.navLink}>
+                <Link href="/capture" className={styles.navLink}>
                   Open app
                 </Link>
                 <a href="#access" className={`${styles.navCta} ${fx.fx}`}>
@@ -47,9 +47,9 @@ export function LandingPage() {
                 </h1>
                 <p className={styles.lede}>Record the job on your wristband. Worvo writes the invoice.</p>
                 <div className={styles.heroCtas}>
-                  <a href="#demo" className={`${styles.ctaPrimary} ${fx.fx}`}>
+                  <Link href="/capture" className={`${styles.ctaPrimary} ${fx.fx}`}>
                     Try it
-                  </a>
+                  </Link>
                   <a href="#access" className={`${styles.ctaGhost} ${fx.fx}`}>
                     Get early access
                   </a>

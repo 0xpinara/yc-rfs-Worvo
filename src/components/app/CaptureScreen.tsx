@@ -9,7 +9,7 @@ import { transcribeBandRecording, transcribeBrowserMic } from "@/lib/api/capture
 import { TALLY_POSES, type TallyPose } from "@/components/landing/tally-art";
 import styles from "./App.module.css";
 import { InvoiceCard } from "./InvoiceCard";
-import { draftSource, messageOf } from "./format";
+import { messageOf } from "./format";
 import { useBand, type BandLight } from "./useBand";
 import { usePhoneMic } from "./usePhoneMic";
 import fx from "@/components/fx/Fx.module.css";
@@ -24,7 +24,7 @@ const LIGHT_LABEL: Record<BandLight, string> = {
   mic: "Mic on",
   ready_amber: "Amber: double-tap to send",
   blocked_red: "Red: needs an answer",
-  sent_blue: "Blue: sent",
+  sent_blue: "Blue: sent (solid)",
   paid_green: "Green: paid",
 };
 
@@ -43,7 +43,7 @@ export function CaptureScreen() {
   const [note, setNote] = useState<string | null>(null);
   const recordingFrom = useRef<"band" | "phone">("phone");
 
-  const { phase, invoice, transcript, error, send, reset, draftFromTranscript } = flow;
+  const { phase, invoice, transcript, error, send, reset, draftFromCapture } = flow;
   const { status: bandStatus, showLight, onDoubleTap } = band;
   const bandReady = bandStatus === "connected" || bandStatus === "recording";
   const ready = invoice !== null && invoice.unresolved.length === 0;
@@ -57,27 +57,43 @@ export function CaptureScreen() {
   }, [rec]);
 
   // Mirror the invoice on the band: amber + double-tap when it can go out, red when it can't,
-  // blue once sent, green when paid. The band ignores colours while its mic is on.
+  // solid blue once sending/sent, green when paid. The band ignores colours while its mic is on.
   const unresolvedCount = invoice?.unresolved.length ?? 0;
   useEffect(() => {
     if (bandStatus !== "connected") return;
-    if (phase === "draft" && unresolvedCount === 0) {
-      void showLight("ready_amber");
-      onDoubleTap(() => void send());
-    } else {
+    let cancelled = false;
+
+    const run = async () => {
+      if (phase === "draft" && unresolvedCount === 0) {
+        onDoubleTap(() => {
+          // Drop amber immediately on the tap that sends — don't wait for Stripe.
+          onDoubleTap(null);
+          void showLight("sent_blue");
+          void send();
+        });
+        if (!cancelled) await showLight("ready_amber");
+        return;
+      }
+
       onDoubleTap(null);
-      if (phase === "draft") void showLight("blocked_red");
-      else if (phase === "sent") void showLight("sent_blue");
-      else if (phase === "paid") void showLight("paid_green");
-      else if (phase === "idle") void showLight("off");
-    }
+      if (cancelled) return;
+      if (phase === "draft") await showLight("blocked_red");
+      else if (phase === "sending" || phase === "sent") await showLight("sent_blue");
+      else if (phase === "paid") await showLight("paid_green");
+      else if (phase === "idle") await showLight("off");
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [bandStatus, phase, unresolvedCount, send, showLight, onDoubleTap]);
 
   useEffect(() => () => onDoubleTap(null), [onDoubleTap]);
 
   const draftFrom = useCallback(
-    (capture: Capture) => draftFromTranscript(capture.transcript, draftSource(capture.source), capture.sourceId),
-    [draftFromTranscript],
+    (capture: Capture) => draftFromCapture(capture),
+    [draftFromCapture],
   );
 
   async function startRecording() {

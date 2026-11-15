@@ -55,6 +55,11 @@ export class BandSession {
   private stopDoubleTap: (() => void) | null = null;
   private packetsLost = 0;
   private doubleTapHandler: (() => void) | null = null;
+  private linkLostHandlers = new Set<() => void>();
+  /** Bumps on every LED request so a slow amber blink can't overwrite a later solid blue. */
+  private ledGeneration = 0;
+  /** Runs LED writes one at a time so BLE replies can't land out of order. */
+  private ledQueue: Promise<void> = Promise.resolve();
 
   get isConnected(): boolean {
     return Boolean(this.band?.connected);
@@ -108,6 +113,7 @@ export class BandSession {
       this.band = null;
       this.provenance = null;
       this.recording = false;
+      for (const handler of this.linkLostHandlers) handler();
     }) as never);
 
     // Event stream for double-tap send (mic must be off when we set LEDs).
@@ -123,31 +129,44 @@ export class BandSession {
 
   /**
    * Status colours after the mic is off.
-   * Amber blink = draft good, double-tap to send. Red = unresolved. Green = paid.
+   * Amber blink = draft good, double-tap to send. Solid blue = sent. Green = paid.
    */
-  async setStatusLed(status: BandLedStatus): Promise<void> {
-    if (!this.band || this.recording) return;
-    try {
-      if (status === "off") {
-        await this.band.ledOff();
-        return;
-      }
-      if (status === "ready_amber") {
-        await this.band.setLed("#ffbf00", { brightness: 1, pattern: "blink", period: 600 });
-        return;
-      }
-      if (status === "blocked_red") {
-        await this.band.setLed("#ff2200", { brightness: 0.8, pattern: "solid", period: 1000 });
-        return;
-      }
-      if (status === "sent_blue") {
-        await this.band.setLed("#2244ff", { brightness: 0.7, pattern: "breathing", period: 1200 });
-        return;
-      }
-      await this.band.setLed("#00cc44", { brightness: 1, pattern: "solid", period: 1000 });
-    } catch {
-      // LED optional if mic still owns it or link dropped.
-    }
+  setStatusLed(status: BandLedStatus): Promise<void> {
+    const generation = ++this.ledGeneration;
+    this.ledQueue = this.ledQueue
+      .then(async () => {
+        // Superseded by a newer colour request — skip this write entirely.
+        if (generation !== this.ledGeneration) return;
+        if (!this.band || this.recording) return;
+        try {
+          if (status === "off") {
+            await this.band.ledOff();
+          } else if (status === "ready_amber") {
+            await this.band.setLed("#ffbf00", { brightness: 1, pattern: "blink", period: 600 });
+          } else if (status === "blocked_red") {
+            await this.band.setLed("#ff2200", { brightness: 0.8, pattern: "solid", period: 1000 });
+          } else if (status === "sent_blue") {
+            // Solid (not blink/breathing) so it clearly replaces the amber ready blink.
+            await this.band.setLed("#2244ff", { brightness: 0.85, pattern: "solid", period: 1000 });
+          } else {
+            await this.band.setLed("#00cc44", { brightness: 1, pattern: "solid", period: 1000 });
+          }
+        } catch {
+          // LED optional if mic still owns it or link dropped.
+        }
+      })
+      .catch(() => {
+        // Keep the queue alive after a failed write.
+      });
+    return this.ledQueue;
+  }
+
+  /** UI subscribe: band radio dropped (out of range, sleep, another tab took it). */
+  onLinkLost(handler: () => void): () => void {
+    this.linkLostHandlers.add(handler);
+    return () => {
+      this.linkLostHandlers.delete(handler);
+    };
   }
 
   /** Arm or clear the double-tap → send handler. */

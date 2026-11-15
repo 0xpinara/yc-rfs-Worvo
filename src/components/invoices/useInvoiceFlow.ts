@@ -1,17 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { DraftRequest, InvoiceView } from "@/shared/contracts";
-import { createDraft, getInvoice, sendInvoice } from "@/lib/api";
+import type { Capture, DraftRequest, InvoiceView } from "@/shared/contracts";
+import { createInvoiceDraft } from "@/lib/api/draft-client";
+import { getInvoice, sendInvoice } from "@/lib/api/send-client";
+import { createDraft } from "@/lib/api";
 
 export type FlowPhase = "idle" | "drafting" | "draft" | "sending" | "sent" | "paid";
 
 const POLL_MS = 1500;
 
 /**
- * The whole demo flow in one place, so the band code can drive it:
- * call draftFromTranscript() when a capture finishes, send() on the double-tap,
- * and turn the light green when phase becomes "paid".
+ * Demo flow driven by the companion UI / band:
+ * draftFromCapture (or draftFromTranscript) → send on double-tap → poll until paid.
+ * Uses Person A's capture/draft/send clients (idempotent keys on draft + send).
  */
 export function useInvoiceFlow() {
   const [invoice, setInvoice] = useState<InvoiceView | null>(null);
@@ -26,11 +28,29 @@ export function useInvoiceFlow() {
     setInvoice(next);
   }, []);
 
+  const draftFromCapture = useCallback(
+    async (capture: Capture) => {
+      if (busyRef.current) return;
+      busyRef.current = true;
+      setBusy("drafting");
+      setError(null);
+      setTranscript(capture.transcript);
+      apply(null);
+      try {
+        apply(await createInvoiceDraft(capture));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Draft failed.");
+      } finally {
+        busyRef.current = false;
+        setBusy(null);
+      }
+    },
+    [apply],
+  );
+
   const draftFromTranscript = useCallback(
     async (text: string, source: DraftRequest["source"] = "typed_text", sourceId?: string) => {
-      if (busyRef.current) {
-        return;
-      }
+      if (busyRef.current) return;
       busyRef.current = true;
       setBusy("drafting");
       setError(null);
@@ -56,20 +76,18 @@ export function useInvoiceFlow() {
     busyRef.current = true;
     setBusy("sending");
     setError(null);
-    const result = await sendInvoice(current.id, current.revision);
-    busyRef.current = false;
-    setBusy(null);
-    if (result.ok) {
-      apply(result.data.invoice);
-    } else {
-      setError(result.error.message);
+    try {
+      apply(await sendInvoice(current.id, current.revision));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Send failed.");
+    } finally {
+      busyRef.current = false;
+      setBusy(null);
     }
   }, [apply]);
 
   const reset = useCallback(() => {
-    if (busyRef.current) {
-      return;
-    }
+    if (busyRef.current) return;
     apply(null);
     setTranscript(null);
     setError(null);
@@ -78,14 +96,16 @@ export function useInvoiceFlow() {
   const waitingForPayment = invoice?.sendStatus === "succeeded" && invoice.paymentStatus !== "paid";
   const invoiceId = invoice?.id;
   useEffect(() => {
-    if (!waitingForPayment || !invoiceId) {
-      return;
-    }
-    const timer = setInterval(async () => {
-      const result = await getInvoice(invoiceId);
-      if (result.ok && invoiceRef.current?.id === invoiceId) {
-        apply(result.data.invoice);
-      }
+    if (!waitingForPayment || !invoiceId) return;
+    const timer = setInterval(() => {
+      void (async () => {
+        try {
+          const latest = await getInvoice(invoiceId);
+          if (invoiceRef.current?.id === invoiceId) apply(latest);
+        } catch {
+          // keep polling
+        }
+      })();
     }, POLL_MS);
     return () => clearInterval(timer);
   }, [waitingForPayment, invoiceId, apply]);
@@ -101,7 +121,7 @@ export function useInvoiceFlow() {
     phase = "draft";
   }
 
-  return { phase, invoice, transcript, error, draftFromTranscript, send, reset };
+  return { phase, invoice, transcript, error, draftFromCapture, draftFromTranscript, send, reset };
 }
 
 export type InvoiceFlow = ReturnType<typeof useInvoiceFlow>;

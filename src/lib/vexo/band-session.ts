@@ -60,6 +60,7 @@ export class BandSession {
   private ledGeneration = 0;
   /** Runs LED writes one at a time so BLE replies can't land out of order. */
   private ledQueue: Promise<void> = Promise.resolve();
+  private levelHandler: ((rms: number) => void) | null = null;
 
   get isConnected(): boolean {
     return Boolean(this.band?.connected);
@@ -169,6 +170,11 @@ export class BandSession {
     };
   }
 
+  /** Live loudness (RMS of each decoded chunk) while recording, for the voice animation. Null clears it. */
+  onLevel(handler: ((rms: number) => void) | null): void {
+    this.levelHandler = handler;
+  }
+
   /** Arm or clear the double-tap → send handler. */
   onDoubleTap(handler: (() => void) | null): void {
     this.stopDoubleTap?.();
@@ -201,6 +207,11 @@ export class BandSession {
         this.sampleRate = info.rate;
         this.packetsLost = info.lost;
         if (this.recording) this.chunks.push(samples.slice());
+        if (this.levelHandler && samples.length > 0) {
+          let sum = 0;
+          for (let i = 0; i < samples.length; i += 1) sum += samples[i] * samples[i];
+          this.levelHandler(Math.sqrt(sum / samples.length));
+        }
       },
       { rate: 16000 },
     );

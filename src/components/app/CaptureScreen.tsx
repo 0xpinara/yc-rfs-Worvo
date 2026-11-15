@@ -12,6 +12,8 @@ import { InvoiceCard } from "./InvoiceCard";
 import { messageOf } from "./format";
 import { useBand, type BandLight } from "./useBand";
 import { usePhoneMic } from "./usePhoneMic";
+import { VoiceOrb } from "./VoiceOrb";
+import { idleVoice, micVoice, pushedVoice, type VoiceSource } from "./voice-meter";
 import fx from "@/components/fx/Fx.module.css";
 
 // Display name only. The connection itself still verifies the team band in band-identity.ts.
@@ -42,6 +44,8 @@ export function CaptureScreen() {
   const [elapsed, setElapsed] = useState(0);
   const [note, setNote] = useState<string | null>(null);
   const recordingFrom = useRef<"band" | "phone">("phone");
+  const [voice, setVoice] = useState<VoiceSource | null>(null);
+  const voiceRef = useRef<VoiceSource | null>(null);
 
   const { phase, invoice, transcript, error, send, reset, draftFromCapture } = flow;
   const { status: bandStatus, showLight, onDoubleTap } = band;
@@ -91,6 +95,42 @@ export function CaptureScreen() {
 
   useEffect(() => () => onDoubleTap(null), [onDoubleTap]);
 
+  // Never leave a listen-only mic stream open after leaving the page.
+  useEffect(() => () => voiceRef.current?.stop(), []);
+
+  const { onLevel } = band;
+  const startVoice = useCallback(
+    async (from: "band" | "phone") => {
+      let next: VoiceSource;
+      if (from === "band") {
+        const pushed = pushedVoice();
+        onLevel(pushed.push);
+        next = pushed;
+      } else {
+        // Animate straight away, then switch to the live mic levels once they're ready.
+        const idle = idleVoice();
+        voiceRef.current = idle;
+        setVoice(idle);
+        next = await micVoice().catch(() => idle);
+        if (voiceRef.current !== idle) {
+          // Recording already stopped (or restarted) while the mic was opening.
+          if (next !== idle) next.stop();
+          return;
+        }
+      }
+      voiceRef.current = next;
+      setVoice(next);
+    },
+    [onLevel],
+  );
+
+  const stopVoice = useCallback(() => {
+    voiceRef.current?.stop();
+    voiceRef.current = null;
+    onLevel(null);
+    setVoice(null);
+  }, [onLevel]);
+
   const draftFrom = useCallback(
     (capture: Capture) => draftFromCapture(capture),
     [draftFromCapture],
@@ -105,6 +145,7 @@ export function CaptureScreen() {
       if (recordingFrom.current === "band") await band.startRecording();
       else await mic.start();
       setRec("recording");
+      void startVoice(recordingFrom.current);
     } catch (err) {
       setRec("idle");
       setNote(messageOf(err, "Couldn’t start recording."));
@@ -112,6 +153,7 @@ export function CaptureScreen() {
   }
 
   async function stopRecording() {
+    stopVoice();
     setRec("transcribing");
     try {
       const capture =
@@ -157,7 +199,7 @@ export function CaptureScreen() {
   const problem = note ?? error ?? band.error;
 
   return (
-    <div className={`${styles.stage} ${styles.onDark}`}>
+    <div className={`${styles.stage} ${styles.onDark}`} data-voice-root>
       <div className={styles.stageGrid}>
         <div className={styles.recorder}>
           <div className={styles.stageTop}>
@@ -202,34 +244,29 @@ export function CaptureScreen() {
           {transcript ? <p className={styles.transcript}>“{transcript}”</p> : null}
 
           <div className={styles.recordRow}>
-            <button
-              type="button"
-              className={styles.recordBtn}
-              data-recording={recording}
-              aria-pressed={recording}
-              aria-label={recording ? "Stop recording" : "Record the job"}
-              disabled={busy && !recording}
-              onClick={() => void (recording ? stopRecording() : startRecording())}
-            >
-              {recording ? (
-                <span className={styles.stopIcon} />
-              ) : (
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <rect x="9" y="3" width="6" height="11" rx="3" />
-                  <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
-                </svg>
-              )}
-            </button>
+            <VoiceOrb source={voice}>
+              <button
+                type="button"
+                className={styles.recordBtn}
+                data-recording={recording}
+                aria-pressed={recording}
+                aria-label={recording ? "Stop recording" : "Record the job"}
+                disabled={busy && !recording}
+                onClick={() => void (recording ? stopRecording() : startRecording())}
+              >
+                {recording ? (
+                  <span className={styles.stopIcon} />
+                ) : (
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="9" y="3" width="6" height="11" rx="3" />
+                    <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
+                  </svg>
+                )}
+              </button>
+            </VoiceOrb>
             <div className={styles.recordText}>
               {recording ? (
                 <>
-                  <span className={styles.wave} aria-hidden="true">
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                  </span>
                   <span className={styles.clock}>
                     {clock(elapsed)} / {clock(MAX_AUDIO_SECONDS)}
                   </span>

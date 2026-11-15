@@ -35,6 +35,8 @@ export type BandApi = {
   stopRecording: () => Promise<BandRecording>;
   showLight: (next: BandLedStatus) => Promise<void>;
   onDoubleTap: (handler: (() => void) | null) => void;
+  /** Live loudness from the band mic while recording, for the voice animation (null clears it). */
+  onLevel: (handler: ((rms: number) => void) | null) => void;
 };
 
 const BandContext = createContext<BandApi | null>(null);
@@ -129,6 +131,10 @@ export function BandProvider({ children }: { children: ReactNode }) {
     sessionRef.current?.onDoubleTap(handler);
   }, []);
 
+  const onLevel = useCallback((handler: ((rms: number) => void) | null) => {
+    sessionRef.current?.onLevel(handler);
+  }, []);
+
   const value = useMemo<BandApi>(
     () => ({
       status,
@@ -142,6 +148,7 @@ export function BandProvider({ children }: { children: ReactNode }) {
       stopRecording,
       showLight,
       onDoubleTap,
+      onLevel,
     }),
     [
       status,
@@ -155,6 +162,7 @@ export function BandProvider({ children }: { children: ReactNode }) {
       stopRecording,
       showLight,
       onDoubleTap,
+      onLevel,
     ],
   );
 

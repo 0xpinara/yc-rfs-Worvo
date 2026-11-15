@@ -128,14 +128,19 @@
 
 .stage {
   position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: max(640px, calc(100vh - 120px));
   overflow: hidden;
-  padding: clamp(24px, 4vw, 56px) clamp(20px, 4vw, 56px);
+  padding: clamp(28px, 5vw, 80px) clamp(20px, 5vw, 80px);
   border-radius: 32px;
   background: radial-gradient(circle at 88% -12%, rgba(169, 199, 255, 0.16), rgba(169, 199, 255, 0) 46%), var(--stage);
   color: #fff;
 }
 
 .stageGrid {
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -160,8 +165,8 @@
 .tally {
   position: relative;
   flex: 0 0 auto;
-  width: 112px;
-  height: 112px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   box-shadow: 0 0 0 2px rgba(169, 199, 255, 0.35);
 }
@@ -273,7 +278,7 @@
 
 .headline {
   margin: 36px 0 0;
-  font-size: clamp(32px, 4vw, 52px);
+  font-size: clamp(36px, 5vw, 72px);
   font-weight: 600;
   font-stretch: 110%;
   line-height: 1.04;
@@ -303,8 +308,8 @@
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 88px;
-  height: 88px;
+  width: 108px;
+  height: 108px;
   border: 0;
   border-radius: 50%;
   background: radial-gradient(circle at 34% 26%, #f1f6ff 0%, #c4d9ff 22%, var(--sky) 52%, #7da2ee 100%);
@@ -491,9 +496,9 @@
 /* ---------- Invoice paper ---------- */
 
 .paper {
-  flex: 5 1 340px;
+  flex: 5 1 360px;
   min-width: 0;
-  max-width: 480px;
+  max-width: 520px;
   box-sizing: border-box;
   padding: 28px;
   border-radius: 22px;

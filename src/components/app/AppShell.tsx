@@ -30,9 +30,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <span className={styles.testChip} title="Stripe test mode: no real money moves">
-          Test mode
-        </span>
       </header>
       <main className={styles.main}>{children}</main>
     </div>

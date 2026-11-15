@@ -198,7 +198,6 @@ export function PriceList({ catalog }: { catalog: Catalog }) {
             aria-pressed={candidate.id === book.id}
             onClick={() => choose(candidate.id)}
           >
-            {candidate.live ? <span className={styles.liveDot} aria-hidden="true" /> : null}
             {candidate.label}
           </button>
         ))}
@@ -210,9 +209,11 @@ export function PriceList({ catalog }: { catalog: Catalog }) {
           <p className={styles.bookMeta}>{book.meta}</p>
         </div>
         <div className={styles.bookActions}>
-          <span className={styles.chip} data-tone={book.live ? "paid" : "neutral"}>
-            {book.live ? "Live" : "Example"}
-          </span>
+          {!book.live ? (
+            <span className={styles.chip} data-tone="neutral">
+              Example
+            </span>
+          ) : null}
           {editing ? (
             <>
               <button type="button" className={styles.ghostBtn} onClick={() => setEditing(false)} disabled={saving}>

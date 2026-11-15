@@ -67,7 +67,7 @@ function liveRow(invoice: InvoiceView): Row {
   return {
     key: invoice.id,
     live: true,
-    trade: "Live",
+    trade: "Yours",
     business: "Your business",
     monogram: "You",
     customer: invoice.customerName ?? "Unknown customer",
@@ -117,7 +117,7 @@ export function InvoiceList() {
   const rows = trade === "All" ? allRows : allRows.filter((row) => row.trade === trade);
   const sumWhere = (tone: StatusTone) =>
     rows.filter((row) => row.status.tone === tone).reduce((sum, row) => sum + (row.totalCents ?? 0), 0);
-  const filters = ["All", ...(liveRows.length > 0 ? ["Live"] : []), ...SAMPLE_TRADES];
+  const filters = ["All", ...(liveRows.length > 0 ? ["Yours"] : []), ...SAMPLE_TRADES];
 
   return (
     <div className={styles.page}>
@@ -152,8 +152,7 @@ export function InvoiceList() {
         ))}
       </div>
       <p className={styles.sampleNote}>
-        Sample book: {SAMPLE_ROWS.length} synthetic invoices from {SAMPLE_BOOK.length} example businesses. Live invoices from this
-        server are marked Live.
+        Sample book: {SAMPLE_ROWS.length} synthetic invoices from {SAMPLE_BOOK.length} example businesses. Yours are listed first.
       </p>
 
       {error ? (
@@ -181,11 +180,7 @@ export function InvoiceList() {
                 <div className={styles.rowTitle}>
                   <span className={styles.rowName}>{row.customer}</span>
                   <span className={styles.rowBiz}>
-                    {row.live ? (
-                      <span className={styles.liveTag}>Live</span>
-                    ) : (
-                      `${row.business} · ${row.trade}`
-                    )}
+                    {row.live ? "Your business" : `${row.business} · ${row.trade}`}
                   </span>
                 </div>
                 <span className={styles.rowSub}>{row.summary}</span>

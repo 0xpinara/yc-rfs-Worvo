@@ -4,7 +4,7 @@
 
 Worvo helps a solo plumber create and send a customer invoice by speaking to a wearable. Customers and rates are configured once. During a visit, the plumber describes the work and requests an invoice; Worvo extracts the details, checks them, and uses Stripe Invoicing to prepare the invoice and customer payment page.
 
-**Status:** local development foundation ready: Next.js shell, shared Zod contracts, synthetic invoice fixtures, and four contract tests. Authentication, persistence, voice capture, extraction, and Stripe are not implemented.
+**Status:** hackathon build for VexoHacks (Nov 14, 2026). Stripe runs in test mode only: no real money moves and Stripe sends no invoice emails.
 
 ## First draft
 
@@ -45,17 +45,17 @@ For the hackathon: one Next.js/TypeScript app with pnpm, Zod, one extraction mod
 Use Node 24 (see `.nvmrc`) and pnpm 10.30.3. From this repository:
 
 ```powershell
-rtk pnpm install --frozen-lockfile
-rtk pnpm check
-rtk pnpm build
-rtk pnpm dev
+pnpm install --frozen-lockfile
+pnpm check
+pnpm build
+pnpm dev
 ```
 
-Open `http://localhost:3000`. The shell requires no credentials and has no invoice actions. It binds to this computer only. `pnpm check` runs TypeScript, ESLint, and four contract tests; it does not prove arithmetic, authorization, database isolation, or provider behavior. `pnpm build` builds the production shell.
+Open `http://localhost:3000` for the landing page; the app is at `/app` and the big-screen demo view at `/demo`. It binds to this computer only. `pnpm check` runs TypeScript, ESLint and the tests; `pnpm build` builds the production app.
 
 The shared types live in `src/shared/contracts.ts`; `src/fixtures/invoice.ts` is the canonical $225 synthetic review fixture. Its `.invalid` recipient cannot be used for sending. See [the execution plan](docs/PARALLEL_WORK_PLAN.md) before branching.
 
-When integrations need configuration, enter only your authorized credentials privately into ignored `.env.local`, using [.env.example](.env.example) as the variable inventory. There is no runtime provider validator yet. Never commit keys or paste them into chat. No accounts, migrations, live invoices, or deployments were created by the foundation setup.
+When integrations need configuration, enter only your authorized credentials privately into ignored `.env.local`, using [.env.example](.env.example) as the variable inventory. There is no runtime provider validator yet. Never commit keys or paste them into chat.
 
 ## Invoices and Stripe (lane B)
 
@@ -77,6 +77,16 @@ No Stripe account is needed: the CLI creates a test sandbox (it expires after 7 
 3. Start webhook forwarding and leave that terminal open: `stripe listen --forward-to 127.0.0.1:3000/api/stripe/webhook`. Put the `whsec_...` it prints in `.env.local` as `STRIPE_WEBHOOK_SECRET`.
 4. Add `INVOICE_TEST_RECIPIENT=billing@juniper-cafe.example.com` to `.env.local`. Stripe test mode never sends invoice emails, so nothing is ever sent to this address; `example.com` is a reserved domain, and it keeps our own addresses off the hosted invoice page shown on screen and in the demo video.
 5. Start (or restart) `pnpm dev`. It reads `.env.local` only when it starts.
+
+### On the deployed site (Render)
+
+`stripe listen` only forwards to a laptop. For the deployed site, create a webhook endpoint once with the same Stripe account as `STRIPE_SECRET_KEY`:
+
+```
+stripe webhook_endpoints create -d url=https://worvo.onrender.com/api/stripe/webhook -d "enabled_events[]=invoice.paid" -d "enabled_events[]=invoice.sent"
+```
+
+Put the `secret` it returns (`whsec_...`) in `STRIPE_WEBHOOK_SECRET` on Render. Invoices live in server memory, so a redeploy (any push to `main`) clears the invoice list; Stripe keeps the invoices themselves.
 
 ### Try the flow without the band
 

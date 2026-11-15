@@ -35,12 +35,19 @@ export type BandSessionOptions = {
   audioPackets?: Uint8Array[];
 };
 
-export type BandLedStatus = "off" | "ready_amber" | "blocked_red" | "sent_blue" | "paid_green";
+export type BandLedStatus =
+  | "off"
+  | "standby"
+  | "ready_amber"
+  | "blocked_red"
+  | "sent_blue"
+  | "paid_green";
 
 /**
  * Official-kit band session for Worvo: Band.connect(53) → configure(audio) → PCM WAV.
  * Microphone blue LED while audio is on — stop audio before amber/green status colours.
- * Demo path (AGENTS.md): amber blink when draft is sendable → double-tap sends → green when paid.
+ * Demo path: standby glow when connected → tap to record → amber blink when sendable →
+ * double-tap sends → green when paid.
  */
 export class BandSession {
   private kit: VexoKit | null = null;
@@ -119,7 +126,7 @@ export class BandSession {
       for (const handler of this.linkLostHandlers) handler();
     }) as never);
 
-    // Event stream for double-tap send (mic must be off when we set LEDs).
+    // Event stream for single-tap record and double-tap send.
     try {
       await band.setEvents({ kinds: ["double-tap", "tap"] });
       await band.configure({ events: true });
@@ -127,12 +134,21 @@ export class BandSession {
       // Sim or older firmware may not expose events; send UI fallback still works.
     }
 
+    // Solid blue as soon as we're linked — same cue as "ready to use the mic."
+    // Don't wait for React; otherwise the watch sits dark after connect.
+    try {
+      await band.setLed("#0000ff", { brightness: 1, pattern: "solid", period: 1000 });
+    } catch {
+      // LED optional
+    }
+
     return this.provenance;
   }
 
   /**
    * Status colours after the mic is off.
-   * Amber blink = draft good, double-tap to send. Solid blue = sent. Green = paid.
+   * Standby solid blue = connected, tap to record. Amber blink = draft good, double-tap to send.
+   * Sent blue = invoice out. Green = paid.
    */
   setStatusLed(status: BandLedStatus): Promise<void> {
     const generation = ++this.ledGeneration;
@@ -144,6 +160,9 @@ export class BandSession {
         try {
           if (status === "off") {
             await this.band.ledOff();
+          } else if (status === "standby") {
+            // Same solid blue as the kit's mic cue so a connected watch looks ready to tap.
+            await this.band.setLed("#0000ff", { brightness: 1, pattern: "solid", period: 1000 });
           } else if (status === "ready_amber") {
             await this.band.setLed("#ffbf00", { brightness: 1, pattern: "blink", period: 600 });
           } else if (status === "blocked_red") {

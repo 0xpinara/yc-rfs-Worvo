@@ -90,6 +90,7 @@ export function BandProvider({ children }: { children: ReactNode }) {
     try {
       setProvenance(await session.connect({ sim: opts?.sim === true }));
       setError(null);
+      setLight("standby");
       setStatus("connected");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Couldn’t connect to the band.";
@@ -121,7 +122,7 @@ export function BandProvider({ children }: { children: ReactNode }) {
     try {
       return await session.stopRecording();
     } finally {
-      setLight("off");
+      // Leave colour to CaptureScreen (standby / amber / …); only drop mic status.
       setStatus(session.isConnected ? "connected" : "idle");
     }
   }, []);

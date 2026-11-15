@@ -23,6 +23,7 @@ type Rec = "idle" | "starting" | "recording" | "transcribing";
 
 const LIGHT_LABEL: Record<BandLight, string> = {
   off: "Light off",
+  standby: "Blue: tap band to record",
   mic: "Recording — tap to stop",
   ready_amber: "Amber: double-tap to send",
   blocked_red: "Red: needs an answer",
@@ -116,7 +117,7 @@ export function CaptureScreen() {
       setRec("idle");
       setNote(messageOf(err, "Couldn’t start recording."));
     }
-  }, [band, bandReady, mic, startVoice]);
+  }, [band.startRecording, bandReady, mic, startVoice]);
 
   const stopRecording = useCallback(async () => {
     stopVoice();
@@ -132,9 +133,27 @@ export function CaptureScreen() {
       setRec("idle");
       setNote(messageOf(err, "Couldn’t hear that. Try again."));
     }
-  }, [band, draftFrom, mic, stopVoice]);
+  }, [band.stopRecording, draftFrom, mic, stopVoice]);
 
-  // Amber + double-tap to send; red when blocked; blue/green after send. Skip while mic owns the wrist LED.
+  // Keep gesture handlers on refs so LED / light updates don't tear down band.on("tap").
+  const startRecordingRef = useRef(startRecording);
+  const stopRecordingRef = useRef(stopRecording);
+  startRecordingRef.current = startRecording;
+  stopRecordingRef.current = stopRecording;
+
+  // Brief settle after connect so we don't eat a wake tap or arm before events are live.
+  const [tapsLive, setTapsLive] = useState(false);
+  useEffect(() => {
+    if (!bandReady) {
+      setTapsLive(false);
+      return;
+    }
+    setTapsLive(false);
+    const id = window.setTimeout(() => setTapsLive(true), 450);
+    return () => window.clearTimeout(id);
+  }, [bandReady, band.provenance?.sessionId]);
+
+  // Standby glow when connected; amber + double-tap to send; skip while mic owns the wrist LED.
   useEffect(() => {
     if (bandStatus !== "connected") {
       onDoubleTap(null);
@@ -160,7 +179,7 @@ export function CaptureScreen() {
       if (phase === "draft") await showLight("blocked_red");
       else if (phase === "sending" || phase === "sent") await showLight("sent_blue");
       else if (phase === "paid") await showLight("paid_green");
-      else if (phase === "idle") await showLight("off");
+      else await showLight("standby"); // idle / drafting — watch looks ready for a tap
     };
 
     void run();
@@ -169,19 +188,23 @@ export function CaptureScreen() {
     };
   }, [bandStatus, phase, sendArmed, unresolvedCount, send, showLight, onDoubleTap, onTap]);
 
-  // Single tap: start/stop recording when not in amber-send mode.
+  // Single tap on the watch: start/stop recording when not in amber-send mode.
   useEffect(() => {
-    if (!bandReady || sendArmed || busy) {
+    if (!bandReady || !tapsLive || sendArmed || busy) {
       if (!sendArmed) onTap(null);
       return;
     }
     if (rec === "recording") {
-      onTap(() => void stopRecording());
+      onTap(() => void stopRecordingRef.current());
       return () => onTap(null);
     }
-    onTap(() => void startRecording());
+    if (rec !== "idle") {
+      onTap(null);
+      return;
+    }
+    onTap(() => void startRecordingRef.current());
     return () => onTap(null);
-  }, [bandReady, sendArmed, busy, rec, onTap, startRecording, stopRecording]);
+  }, [bandReady, tapsLive, sendArmed, busy, rec, onTap]);
 
   useEffect(
     () => () => {

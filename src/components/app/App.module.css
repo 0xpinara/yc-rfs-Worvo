@@ -253,6 +253,11 @@
   box-shadow: 0 0 0 3px rgba(91, 110, 143, 0.25);
 }
 
+.light[data-light="standby"] {
+  background: #4f7dff;
+  box-shadow: 0 0 0 3px rgba(79, 125, 255, 0.3), 0 0 14px #4f7dff;
+}
+
 .light[data-light="mic"] {
   background: #ff3b30;
   box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.35), 0 0 14px #ff3b30;

@@ -26,7 +26,7 @@ const NON_FIXTURE =
 test("Gemini skips when credentials are absent", async () => {
   const outcome = await extractWithGemini("Ninety minutes of labor.", {
     apiKey: "",
-    model: "gemini-3.8-flash",
+    model: "gemini-4-argon",
   });
   assert.equal(outcome.ok, false);
   if (!outcome.ok) assert.equal(outcome.reason, "missing_credentials");
@@ -74,7 +74,7 @@ test("Gemini candidate strips injected approval and email", async () => {
   const proposal = await extractProposal(captureFor(NON_FIXTURE), {
     useProvider: true,
     apiKey: "test-key",
-    model: "gemini-3.8-flash",
+    model: "gemini-4-argon",
     fetchFn,
   });
 
@@ -92,7 +92,7 @@ test("Gemini HTTP errors surface as provider_error", async () => {
     new Response(JSON.stringify({ error: { message: "quota" } }), { status: 429 });
   const outcome = await extractWithGemini("test", {
     apiKey: "test-key",
-    model: "gemini-3.8-flash",
+    model: "gemini-4-argon",
     fetchFn,
   });
   assert.equal(outcome.ok, false);

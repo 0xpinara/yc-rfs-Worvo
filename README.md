@@ -45,17 +45,17 @@ For the hackathon: one Next.js/TypeScript app with pnpm, Zod, one extraction mod
 Use Node 24 (see `.nvmrc`) and pnpm 10.30.3. From this repository:
 
 ```powershell
-rtk pnpm install --frozen-lockfile
-rtk pnpm check
-rtk pnpm build
-rtk pnpm dev
+pnpm install --frozen-lockfile
+pnpm check
+pnpm build
+pnpm dev
 ```
 
-Open `http://localhost:3000`. The shell requires no credentials and has no invoice actions. It binds to this computer only. `pnpm check` runs TypeScript, ESLint, and four contract tests; it does not prove arithmetic, authorization, database isolation, or provider behavior. `pnpm build` builds the production shell.
+Open `http://localhost:3000` for the landing page; the app is at `/app` and the big-screen demo view at `/demo`. It binds to this computer only. `pnpm check` runs TypeScript, ESLint and the tests; `pnpm build` builds the production app.
 
 The shared types live in `src/shared/contracts.ts`; `src/fixtures/invoice.ts` is the canonical $225 synthetic review fixture. Its `.invalid` recipient cannot be used for sending. See [the execution plan](docs/PARALLEL_WORK_PLAN.md) before branching.
 
-When integrations need configuration, enter only your authorized credentials privately into ignored `.env.local`, using [.env.example](.env.example) as the variable inventory. There is no runtime provider validator yet. Never commit keys or paste them into chat. No accounts, migrations, live invoices, or deployments were created by the foundation setup.
+When integrations need configuration, enter only your authorized credentials privately into ignored `.env.local`, using [.env.example](.env.example) as the variable inventory. There is no runtime provider validator yet. Never commit keys or paste them into chat.
 
 ## Invoices and Stripe (lane B)
 

@@ -53,8 +53,10 @@ export class BandSession {
   private provenance: BandSessionProvenance | null = null;
   private stopAudioListener: (() => void) | null = null;
   private stopDoubleTap: (() => void) | null = null;
+  private stopTap: (() => void) | null = null;
   private packetsLost = 0;
   private doubleTapHandler: (() => void) | null = null;
+  private tapHandler: (() => void) | null = null;
   private linkLostHandlers = new Set<() => void>();
   /** Bumps on every LED request so a slow amber blink can't overwrite a later solid blue. */
   private ledGeneration = 0;
@@ -109,8 +111,8 @@ export class BandSession {
 
     band.on("disconnect", (() => {
       void this.cleanupAudio();
-      this.stopDoubleTap?.();
-      this.stopDoubleTap = null;
+      this.onDoubleTap(null);
+      this.onTap(null);
       this.band = null;
       this.provenance = null;
       this.recording = false;
@@ -183,6 +185,17 @@ export class BandSession {
     if (!handler || !this.band) return;
     this.stopDoubleTap = this.band.on("double-tap", (() => {
       this.doubleTapHandler?.();
+    }) as never);
+  }
+
+  /** Arm or clear the single-tap → start/stop recording handler. Clear while amber send is armed. */
+  onTap(handler: (() => void) | null): void {
+    this.stopTap?.();
+    this.stopTap = null;
+    this.tapHandler = handler;
+    if (!handler || !this.band) return;
+    this.stopTap = this.band.on("tap", (() => {
+      this.tapHandler?.();
     }) as never);
   }
 
@@ -287,6 +300,7 @@ export class BandSession {
   async disconnect(): Promise<void> {
     this.recording = false;
     this.onDoubleTap(null);
+    this.onTap(null);
     await this.cleanupAudio();
     if (this.band) {
       try {

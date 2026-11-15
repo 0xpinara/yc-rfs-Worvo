@@ -23,7 +23,7 @@ type Rec = "idle" | "starting" | "recording" | "transcribing";
 
 const LIGHT_LABEL: Record<BandLight, string> = {
   off: "Light off",
-  mic: "Mic on",
+  mic: "Recording — tap to stop",
   ready_amber: "Amber: double-tap to send",
   blocked_red: "Red: needs an answer",
   sent_blue: "Blue: sent (solid)",
@@ -48,10 +48,12 @@ export function CaptureScreen() {
   const voiceRef = useRef<VoiceSource | null>(null);
 
   const { phase, invoice, transcript, error, send, reset, draftFromCapture } = flow;
-  const { status: bandStatus, showLight, onDoubleTap } = band;
+  const { status: bandStatus, showLight, onDoubleTap, onTap, onLevel } = band;
   const bandReady = bandStatus === "connected" || bandStatus === "recording";
   const ready = invoice !== null && invoice.unresolved.length === 0;
   const busy = phase === "drafting" || phase === "sending" || rec === "starting" || rec === "transcribing";
+  const sendArmed = phase === "draft" && ready;
+  const unresolvedCount = invoice?.unresolved.length ?? 0;
 
   useEffect(() => {
     if (rec !== "recording") return;
@@ -60,45 +62,9 @@ export function CaptureScreen() {
     return () => window.clearInterval(id);
   }, [rec]);
 
-  // Mirror the invoice on the band: amber + double-tap when it can go out, red when it can't,
-  // solid blue once sending/sent, green when paid. The band ignores colours while its mic is on.
-  const unresolvedCount = invoice?.unresolved.length ?? 0;
-  useEffect(() => {
-    if (bandStatus !== "connected") return;
-    let cancelled = false;
-
-    const run = async () => {
-      if (phase === "draft" && unresolvedCount === 0) {
-        onDoubleTap(() => {
-          // Drop amber immediately on the tap that sends — don't wait for Stripe.
-          onDoubleTap(null);
-          void showLight("sent_blue");
-          void send();
-        });
-        if (!cancelled) await showLight("ready_amber");
-        return;
-      }
-
-      onDoubleTap(null);
-      if (cancelled) return;
-      if (phase === "draft") await showLight("blocked_red");
-      else if (phase === "sending" || phase === "sent") await showLight("sent_blue");
-      else if (phase === "paid") await showLight("paid_green");
-      else if (phase === "idle") await showLight("off");
-    };
-
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [bandStatus, phase, unresolvedCount, send, showLight, onDoubleTap]);
-
-  useEffect(() => () => onDoubleTap(null), [onDoubleTap]);
-
   // Never leave a listen-only mic stream open after leaving the page.
   useEffect(() => () => voiceRef.current?.stop(), []);
 
-  const { onLevel } = band;
   const startVoice = useCallback(
     async (from: "band" | "phone") => {
       let next: VoiceSource;
@@ -136,7 +102,7 @@ export function CaptureScreen() {
     [draftFromCapture],
   );
 
-  async function startRecording() {
+  const startRecording = useCallback(async () => {
     setNote(null);
     setElapsed(0);
     recordingFrom.current = bandReady ? "band" : "phone";
@@ -150,9 +116,9 @@ export function CaptureScreen() {
       setRec("idle");
       setNote(messageOf(err, "Couldn’t start recording."));
     }
-  }
+  }, [band, bandReady, mic, startVoice]);
 
-  async function stopRecording() {
+  const stopRecording = useCallback(async () => {
     stopVoice();
     setRec("transcribing");
     try {
@@ -166,7 +132,64 @@ export function CaptureScreen() {
       setRec("idle");
       setNote(messageOf(err, "Couldn’t hear that. Try again."));
     }
-  }
+  }, [band, draftFrom, mic, stopVoice]);
+
+  // Amber + double-tap to send; red when blocked; blue/green after send. Skip while mic owns the wrist LED.
+  useEffect(() => {
+    if (bandStatus !== "connected") {
+      onDoubleTap(null);
+      return;
+    }
+    let cancelled = false;
+
+    const run = async () => {
+      if (sendArmed) {
+        onTap(null);
+        onDoubleTap(() => {
+          onDoubleTap(null);
+          onTap(null);
+          void showLight("sent_blue");
+          void send();
+        });
+        if (!cancelled) await showLight("ready_amber");
+        return;
+      }
+
+      onDoubleTap(null);
+      if (cancelled) return;
+      if (phase === "draft") await showLight("blocked_red");
+      else if (phase === "sending" || phase === "sent") await showLight("sent_blue");
+      else if (phase === "paid") await showLight("paid_green");
+      else if (phase === "idle") await showLight("off");
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [bandStatus, phase, sendArmed, unresolvedCount, send, showLight, onDoubleTap, onTap]);
+
+  // Single tap: start/stop recording when not in amber-send mode.
+  useEffect(() => {
+    if (!bandReady || sendArmed || busy) {
+      if (!sendArmed) onTap(null);
+      return;
+    }
+    if (rec === "recording") {
+      onTap(() => void stopRecording());
+      return () => onTap(null);
+    }
+    onTap(() => void startRecording());
+    return () => onTap(null);
+  }, [bandReady, sendArmed, busy, rec, onTap, startRecording, stopRecording]);
+
+  useEffect(
+    () => () => {
+      onDoubleTap(null);
+      onTap(null);
+    },
+    [onDoubleTap, onTap],
+  );
 
   function startOver() {
     setNote(null);
@@ -174,8 +197,8 @@ export function CaptureScreen() {
   }
 
   let pose: TallyPose = "listening";
-  let headline = "Tap to record the job.";
-  if (rec === "recording") headline = "Listening…";
+  let headline = bandReady ? "Tap your band to record." : "Tap to record the job.";
+  if (rec === "recording") headline = "Listening… tap the band to stop.";
   else if (rec === "transcribing" || rec === "starting") {
     pose = "writing";
     headline = rec === "starting" ? "Getting ready…" : "Got it. Writing it up…";
@@ -270,11 +293,13 @@ export function CaptureScreen() {
                   <span className={styles.clock}>
                     {clock(elapsed)} / {clock(MAX_AUDIO_SECONDS)}
                   </span>
-                  <span className={styles.recordHint}>Tap to stop</span>
+                  <span className={styles.recordHint}>{bandReady ? "Tap the band to stop" : "Tap to stop"}</span>
                 </>
               ) : (
                 <>
-                  <span className={styles.recordLabel}>{bandReady ? `Record on ${BAND_LABEL}` : "Record with this phone"}</span>
+                  <span className={styles.recordLabel}>
+                    {bandReady ? `Tap ${BAND_LABEL} to record` : "Record with this phone"}
+                  </span>
                 </>
               )}
             </div>

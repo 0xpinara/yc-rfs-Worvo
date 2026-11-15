@@ -254,8 +254,9 @@
 }
 
 .light[data-light="mic"] {
-  background: #4f7dff;
-  box-shadow: 0 0 0 3px rgba(79, 125, 255, 0.3), 0 0 14px #4f7dff;
+  background: #ff3b30;
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.35), 0 0 14px #ff3b30;
+  animation: blink 450ms steps(1) infinite;
 }
 
 .light[data-light="ready_amber"] {

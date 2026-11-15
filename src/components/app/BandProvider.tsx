@@ -20,7 +20,10 @@ import {
 } from "@/lib/vexo/band-session";
 
 export type BandStatus = "idle" | "connecting" | "connected" | "recording";
-/** What the band's light is showing: the kit's status colours, plus "mic" (solid blue while recording). */
+/**
+ * Companion light state. Wrist LED: kit forces solid blue while the mic stream is on;
+ * "mic" is shown as a red blink in the UI so recording reads clearly next to amber/green.
+ */
 export type BandLight = BandLedStatus | "mic";
 
 export type BandApi = {
@@ -35,6 +38,7 @@ export type BandApi = {
   stopRecording: () => Promise<BandRecording>;
   showLight: (next: BandLedStatus) => Promise<void>;
   onDoubleTap: (handler: (() => void) | null) => void;
+  onTap: (handler: (() => void) | null) => void;
   /** Live loudness from the band mic while recording, for the voice animation (null clears it). */
   onLevel: (handler: ((rms: number) => void) | null) => void;
 };
@@ -131,6 +135,10 @@ export function BandProvider({ children }: { children: ReactNode }) {
     sessionRef.current?.onDoubleTap(handler);
   }, []);
 
+  const onTap = useCallback((handler: (() => void) | null) => {
+    sessionRef.current?.onTap(handler);
+  }, []);
+
   const onLevel = useCallback((handler: ((rms: number) => void) | null) => {
     sessionRef.current?.onLevel(handler);
   }, []);
@@ -148,6 +156,7 @@ export function BandProvider({ children }: { children: ReactNode }) {
       stopRecording,
       showLight,
       onDoubleTap,
+      onTap,
       onLevel,
     }),
     [
@@ -162,6 +171,7 @@ export function BandProvider({ children }: { children: ReactNode }) {
       stopRecording,
       showLight,
       onDoubleTap,
+      onTap,
       onLevel,
     ],
   );

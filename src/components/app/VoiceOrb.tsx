@@ -74,7 +74,7 @@ export function VoiceOrb({ source, children }: { source: VoiceSource | null; chi
         ctx.strokeStyle = `rgba(${SKY.join(",")}, ${ripples[i].strength * (1 - progress) ** 2 * 0.7})`;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(c, c, ORB + 10 + eased * 100, 0, Math.PI * 2);
+        ctx.arc(c, c, ORB + 10 + eased * 78, 0, Math.PI * 2);
         ctx.stroke();
       }
 

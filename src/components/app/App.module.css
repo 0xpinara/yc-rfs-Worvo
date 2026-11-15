@@ -152,6 +152,8 @@
   flex: 7 1 420px;
   flex-direction: column;
   min-width: 0;
+  /* Room on the left so the voice rings around the orb stay inside the card. */
+  padding-left: clamp(16px, 4vw, 64px);
 }
 
 .stageTop {

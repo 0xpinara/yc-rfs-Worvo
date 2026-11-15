@@ -1,0 +1,39 @@
+# Worvo on Render — Node web service (Next.js).
+# Secrets are set in the dashboard / via API (sync: false), not committed here.
+
+services:
+  - type: web
+    name: worvo
+    runtime: node
+    plan: starter
+    region: oregon
+    branch: main
+    autoDeployTrigger: commit
+    buildCommand: npm install -g pnpm@10.30.3 && pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm exec next start --hostname 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22.13.0"
+      - key: NODE_ENV
+        value: production
+      - key: SPEECH_PROVIDER
+        value: deepgram
+      - key: AI_PROVIDER
+        value: google
+      - key: AI_MODEL
+        value: gemini-3.8-flash
+      - key: DEMO_MODE
+        value: "true"
+      - key: DEMO_IDENTITY_ENABLED
+        value: "true"
+      - key: DEEPGRAM_API_KEY
+        sync: false
+      - key: GOOGLE_GENERATIVE_AI_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: INVOICE_TEST_RECIPIENT
+        sync: false

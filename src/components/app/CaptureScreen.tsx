@@ -17,7 +17,7 @@ import { idleVoice, micVoice, pushedVoice, type VoiceSource } from "./voice-mete
 import fx from "@/components/fx/Fx.module.css";
 
 // Display name only. The connection itself still verifies the team band in band-identity.ts.
-const BAND_LABEL = "Vexo 123";
+const BAND_LABEL = "Vexo Band";
 
 type Rec = "idle" | "starting" | "recording" | "transcribing";
 
@@ -233,7 +233,7 @@ export function CaptureScreen() {
                   ? "Band needs Chrome or Edge"
                   : bandStatus === "connecting"
                     ? "Connecting…"
-                    : `Connect ${BAND_LABEL}`}
+                    : "Connect Vexo Band"}
               </button>
             )}
           </div>
